@@ -117,9 +117,9 @@ coTrainingDwc <- function(learner, predFunc, data1, data2, k_fixo = T) {
   it <- 0
   cls_1 <- match(label, colnames(data1))
   cls_2 <- match(label, colnames(data2))
-  base_add <- round(nrow(probPreds1) * 0.1)
   sup1 <- which(!is.na(data1[, as.character(form[[2]])])) #exemplos inicialmente rotulados
   sup2 <- which(!is.na(data2[, as.character(form[[2]])])) #exemplos inicialmente rotulados
+  base_add <- round(nrow(data1[-sup1,]) * 0.1)
   while (((it < maxIts) && ((length(sup1) / N) < 1) && ((length(sup2) / N) < 1))) {
     new_samples1 <- c()
     new_samples2 <- c()
@@ -143,9 +143,9 @@ coTrainingDwc <- function(learner, predFunc, data1, data2, k_fixo = T) {
       cent_2 <- match(probPreds_distance_2$cl[i], rownames(centroides_2))
       
       dist_inst_1 <- euclidian_distance(data1[probPreds_distance_1$id[i],-cls_1],
-                                      centroides[cent_1,])
+                                        centroides_1[cent_1,])
       dist_inst_2 <- euclidian_distance(data2[probPreds_distance_2$id[i],-cls_2],
-                                      centroides[cent_2,])
+                                        centroides_2[cent_2,])
       probPreds_distance_1$pred[i] <- probPreds_distance_1$pred[i] / dist_inst_1
       probPreds_distance_2$pred[i] <- probPreds_distance_2$pred[i] / dist_inst_2
     }

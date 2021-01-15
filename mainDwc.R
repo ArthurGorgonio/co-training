@@ -28,7 +28,7 @@ label <- "class"
 form <- as.formula("class ~ .")
 funcType <- "probability"
 meansFlexConC1S <- c()
-method <- "Co-Training Standard"
+method <- "Co-Training DwC"
 databases <- list.files(path = "../datasets")
 ratio <- 0.1
 learner <- baseClassifiers
@@ -90,7 +90,7 @@ for (dataset in databases) {
                        samplesClass = length(class))
     
     
-    co_training <- coTrainingOriginal(learner, myFuncs, data1, data2)
+    co_training <- coTrainingDwc(learner, myFuncs, data1, data2)
     
     
     cm1 <- confusionMatrix(co_training[[1]], data_test1)
@@ -132,11 +132,11 @@ for (dataset in databases) {
     
   }
   end <- Sys.time()
-  writeArchive("coTrainingMediaStandard.txt", "./", dataName, method, acc_co,
+  writeArchive("coTrainingMediaDWC.txt", "./", dataName, method, acc_co,
                fscore_co, preci_co, recall_co, begin, end)
-  writeArchive("coTrainingVisao1Standard.txt", "./", dataName, method,
+  writeArchive("coTrainingVisao1DWC.txt", "./", dataName, method,
                acc_co_v1, fscore_co_v1, preci_co_v1, recall_co_v1, begin, end)
-  writeArchive("coTrainingVisao2Standard.txt", "./", dataName, method,
+  writeArchive("coTrainingVisao2DWC.txt", "./", dataName, method,
                acc_co_v2, fscore_co_v2, preci_co_v2, recall_co_v2, begin, end)
   cat("Arquivos do método ", method, " foram salvos.")
 }

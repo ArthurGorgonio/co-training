@@ -21,8 +21,9 @@
 #' @param col An optional parameter to write cols in the file. (Default FALSE).
 #' @param sep An optional parameter to use in paste. (Default " " Single space).
 #'
-writeArchive <- function(title, prefix, dataName, acc, f1, preci, recall, begin,
-                         end, append = T, row = F, col = F, sep = " ") {
+writeArchive <- function(title, prefix, dataName, method, acc, f1, preci,
+                         recall, begin, end, append = T, row = F, col = F,
+                         sep = " ") {
   acc <- round(acc, 4)
   f1 <- round(f1, 4)
   preci <- round(preci, 4)
@@ -33,7 +34,7 @@ writeArchive <- function(title, prefix, dataName, acc, f1, preci, recall, begin,
   metrics <- "\taccura\terror\tfmeasu\tprecis\trecall"
   dbName <- paste("@DATASET:", dataName)
   folds <- "@Folds\t: 10"
-  version <- "@STvers\t: CoTraining Original"
+  version <- paste("@SSL approach\t:", method, sep = "")
   headers <- paste(separ, dbName, folds, version, separ, metrics,
                    separ, sep = "\n")
   line <- c()

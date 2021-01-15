@@ -60,15 +60,12 @@ convertProbPreds <- function(probPreds) {
 #                2 = co-training baseado no metodo de Felipe (k=limiar)
 #                3 = co-training gradativo (k=limiar que diminui 5% a cada iteracao)
 coTrainingOriginal <- function(learner, predFunc, data1, data2, k_fixo = T) {
-  k <- 5
-  thrConf <- 0.95
   maxIts <- 100
-  verbose <- T
   N <- NROW(data1)
   it <- 0
-  base_add <- round(nrow(probPreds1) * 0.1)
   sup1 <- which(!is.na(data1[, as.character(form[[2]])])) #exemplos inicialmente rotulados
   sup2 <- which(!is.na(data2[, as.character(form[[2]])])) #exemplos inicialmente rotulados
+  base_add <- round(nrow(data1[-sup1,]) * 0.1)
   while (((it < maxIts) && ((length(sup1) / N) < 1) && ((length(sup2) / N) < 1))) {
     new_samples1 <- c()
     new_samples2 <- c()
@@ -80,8 +77,8 @@ coTrainingOriginal <- function(learner, predFunc, data1, data2, k_fixo = T) {
     model2 <- generateModel(learner, form, data2[sup2, ])
     
     # Classify instances in unlabelled data
-    probPreds1 <- generateProbPreds(model1, data1[-sup2,], predFunc)
-    probPreds2 <- generateProbPreds(model2, data2[-sup1,], predFunc)
+    probPreds1 <- generateProbPreds(model1, data1[-sup1,], predFunc)
+    probPreds2 <- generateProbPreds(model2, data2[-sup2,], predFunc)
     
     # Sort the instances based on confidence value
     probPreds1_ordenado <- order(probPreds1$p, decreasing = T)
@@ -96,8 +93,8 @@ coTrainingOriginal <- function(learner, predFunc, data1, data2, k_fixo = T) {
       pos2 <- match(new_samples2$id, rownames(data2))
       data1[pos2, as.character(form[[2]])] <- new_samples2$cl
       data2[pos1, as.character(form[[2]])] <- new_samples1$cl
-      sup1 <- c(sup1, as.numeric(new_samples2$id))
-      sup2 <- c(sup2, as.numeric(new_samples1$id))
+      sup1 <- c(sup1, pos2)
+      sup2 <- c(sup2, pos1)
       
     } else {
       new_samples1 <- c()
@@ -109,10 +106,7 @@ coTrainingOriginal <- function(learner, predFunc, data1, data2, k_fixo = T) {
 }
 
 coTrainingDwc <- function(learner, predFunc, data1, data2, k_fixo = T) {
-  k <- 5
-  thrConf <- 0.95
   maxIts <- 100
-  verbose <- T
   N <- NROW(data1)
   it <- 0
   cls_1 <- match(label, colnames(data1))
@@ -131,8 +125,8 @@ coTrainingDwc <- function(learner, predFunc, data1, data2, k_fixo = T) {
     model2 <- generateModel(learner, form, data2[sup2, ])
     
     # Classify instances in unlabelled data
-    probPreds1 <- generateProbPreds(model1, data1[-sup2,], predFunc)
-    probPreds2 <- generateProbPreds(model2, data2[-sup1,], predFunc)    
+    probPreds1 <- generateProbPreds(model1, data1[-sup1,], predFunc)
+    probPreds2 <- generateProbPreds(model2, data2[-sup2,], predFunc)
     
     centroides_1 <- calculate_centroid(data1[sup1,])
     probPreds_distance_1 <- probPreds1
@@ -176,6 +170,89 @@ coTrainingDwc <- function(learner, predFunc, data1, data2, k_fixo = T) {
   return(model)
 }
 
+
+coTrainingEbalV1 <- function(main_cl, pred_func, data1, data2) {
+  base_learn <- c(learner("SMO", list(control = Weka_control(C = 1, K = list("PolyKernel", E = 1)))),
+                learner("SMO", list(control = Weka_control(C = .8, K = list("PolyKernel", E = 1)))),
+                learner("SMO", list(control = Weka_control(C = 1, K = list("NormalizedPolyKernel", E = 2)))),
+                learner("SMO", list(control = Weka_control(C = 1, K = list("RBFKernel")))),
+                learner("SMO", list(control = Weka_control(C = 1, K = list("Puk", O = 1, S = 1)))),
+                learner("DT", list(control = Weka_control(X = 1, K = list("BestFirst", D = 1, N = 3)))),
+                learner("DT", list(control = Weka_control(X = 1, K = list("BestFirst", D = 1, N = 5)))),
+                learner("DT", list(control = Weka_control(X = 1, K = list("BestFirst", D = 1, N = 7)))),
+                learner("J48", list(control = Weka_control(C = .05, M = 2))),
+                learner("J48", list(control = Weka_control(C = .10, M = 2))),
+                learner("J48", list(control = Weka_control(C = .20, M = 2))),
+                learner("J48", list(control = Weka_control(C = .25, M = 2))),
+                learner("IBk", list(control = Weka_control(K = 1, A = list("LinearNNSearch", A = "EuclideanDistance")))),
+                learner("IBk", list(control = Weka_control(K = 3, A = list("LinearNNSearch", A = "EuclideanDistance")))),
+                learner("IBk", list(control = Weka_control(K = 5, A = list("LinearNNSearch", A = "EuclideanDistance")))),
+                learner("IBk", list(control = Weka_control(K = 3, A = list("LinearNNSearch", A = "ManhattanDistance")))),
+                learner("IBk", list(control = Weka_control(K = 5, A = list("LinearNNSearch", A = "ManhattanDistance")))),
+                learner("Naive", list(control = Weka_control())),
+                learner("Naive", list(control = Weka_control(K = TRUE))),
+                learner("Naive", list(control = Weka_control(D = TRUE)))
+                )
+                
+  pred_func_ensemble <- rep("class", 20)
+  maxIts <- 100
+  N <- NROW(data1)
+  it <- 0
+  sup1 <- which(!is.na(data1[, as.character(form[[2]])])) #exemplos inicialmente rotulados
+  sup2 <- which(!is.na(data2[, as.character(form[[2]])])) #exemplos inicialmente rotulados
+  base_add <- round(nrow(data1[-sup1,]) * 0.1)
+  while (((it < maxIts) && ((length(sup1) / N) < 1) && ((length(sup2) / N) < 1))) {
+    new_samples1 <- c()
+    new_samples2 <- c()
+    acertou <- 0
+    it <- it + 1
+    
+    # Create and train the base classifier
+    model1 <- generateModel(learner, form, data1[sup1, ])
+    model2 <- generateModel(learner, form, data2[sup2, ])
+    
+    # Train base ensemble
+    ensemble1 <- train_ensemble(base_learn, data1[sup1, ])
+    ensemble2 <- train_ensemble(base_learn, data1[sup2, ])
+    
+    # Classify instances in unlabelled data
+    probPreds1 <- generateProbPreds(model1, data1[-sup1,], predFunc)
+    probPreds2 <- generateProbPreds(model2, data2[-sup2,], predFunc)
+    
+    # Sort the instances based on confidence value
+    probPreds1_ordenado <- order(probPreds1$p, decreasing = T)
+    probPreds2_ordenado <- order(probPreds2$p, decreasing = T)
+    
+    qtd_add <- min(base_add, length(probPreds1_ordenado))
+    
+    if (qtd_add > 0) {
+      new_samples1 <- probPreds1[probPreds1_ordenado[1:qtd_add], -2]
+      new_samples2 <- probPreds2[probPreds2_ordenado[1:qtd_add], -2]
+      pos1 <- match(new_samples1$id, rownames(data1))
+      pos2 <- match(new_samples2$id, rownames(data2))
+      data1[pos2, as.character(form[[2]])] <- new_samples2$cl
+      data2[pos1, as.character(form[[2]])] <- new_samples1$cl
+      sup1 <- c(sup1, pos2)
+      sup2 <- c(sup2, pos1)
+      
+    } else {
+      new_samples1 <- c()
+      new_samples2 <- c()
+    }
+  }
+  model <- list(model1, model2)
+  return(model)
+}
+
+train_ensemble <- function(base_classifiers, data_labeled) {
+  ensemble <- list()
+  for (i in 1:length(base_classifiers)) {
+    learner <- base_classifiers[[i]]
+    model <- generateModel(learner, form, data_labeled)
+    ensemble <- addingEnsemble(ensemble, model)
+  }
+  return(ensemble)
+}
 
 criar_visao <- function(dados) {
   col <- round((ncol(dados) - 1) / 2)

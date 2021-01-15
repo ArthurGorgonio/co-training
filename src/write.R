@@ -51,7 +51,8 @@ writeArchive <- function(title, prefix, dataName, method, acc, f1, preci,
   line <- paste(line, separ, allMeans, separ, sep = "\n")
   time <- paste("BEGIN:\t", format(begin, pattern), "\nEND:\t", 
                 format(end, pattern), "\n\nTIME ELAPSED: ",
-                round(end - begin, 4), " seconds\n", separ, sep = "")
+                round(as.numeric(difftime(end, begin, units = "secs")), 3),
+                "\n", separ, sep = "")
   content <- paste(headers, line, time, sep = "\n")
   write(content, filePath, append = append, sep = sep)
 }

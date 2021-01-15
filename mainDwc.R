@@ -29,14 +29,25 @@ form <- as.formula("class ~ .")
 funcType <- "probability"
 meansFlexConC1S <- c()
 method <- "Co-Training DwC"
-databases <- list.files(path = "../datasets")
+databases <- c("Abalone.arrf", "Arrhythmia.arrf", "Car.arrf", "Ecoli.arrf",
+               "Glass.arrf", "Hill-valley.arrf", "Kr-vs-kp.arrf",
+               "Leukemia.arrf", "Madelon.arrf", "Multiple-features.arrf",
+               "Secom.arrf", "Seeds.arrf", "Semeion.arrf", "Solar-flare.arrf",
+               "Spectf-heart.arrf", "Tic-tac-toe.arrf", "Twonorm.arrf",
+               "Waveform.arrf", "Wine.arrf", "Yeast.arrf", "Haberman.arrf",
+               "Planning.arrf", "Btsc.arrf", "Mammographic-mass.arrf",
+               "Pima.arrf", "Sonar.arrf", "Solar_flare1.arrf", "Ilpd.arrf",
+               "Automobile.arrf", "German_credit.arrf", "Flags.arrf",
+               "Wilt.arrf", "Vehicle.arrf", "Dermatology.arrf", "Phishing.arrf",
+               "Image-seg.arrf", "Mushroom.arrf", "Ozone.arrf", "Nursery.arrf",
+               "Adult.arrf", "Pen-digits.arrf", "Musk.arrf", "Cnae.arrf")
 ratio <- 0.1
 learner <- baseClassifiers
 myFuncs <- funcType
 
 
 ## Versions Standard and DWC Standard
-
+bd <- 1
 set.seed(19)
 for (dataset in databases) {
   dataName <- strsplit(dataset, ".", T)[[1]][1]
@@ -127,7 +138,7 @@ for (dataset in databases) {
     recall_co_v1 <- c(recall_co_v1, recall_model1)
     recall_co_v2 <- c(recall_co_v2, recall_model2)
     
-    cat("DataSet:\t", dataName, "\tIt:\t", ite, "\n")
+    cat("DataSet[", bd, "]:\t", dataName, "\tIt:\t", ite, "\n")
     ite <- ite + 1
     
   }
@@ -139,5 +150,6 @@ for (dataset in databases) {
   writeArchive("coTrainingVisao2DWC.txt", "./", dataName, method,
                acc_co_v2, fscore_co_v2, preci_co_v2, recall_co_v2, begin, end)
   cat("Arquivos do método ", method, " foram salvos.")
+  bd <- bd + 1
 }
 

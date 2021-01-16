@@ -124,6 +124,9 @@ coTrainingOriginal <- function(learner, predFunc, data1, data2, k_fixo = T) {
       new_samples2 <- c()
     }
   }
+  model1 <- generateModel(learner, form, data1[sup1, ])
+  model2 <- generateModel(learner, form, data2[sup2, ])
+  
   model <- list(model1, model2)
   return(model)
 }
@@ -188,12 +191,15 @@ coTrainingDwc <- function(learner, predFunc, data1, data2, k_fixo = T) {
       new_samples2 <- c()
     }
   }
+  model1 <- generateModel(learner, form, data1[sup1, ])
+  model2 <- generateModel(learner, form, data2[sup2, ])
+  
   model <- list(model1, model2)
   return(model)
 }
 
 
-coTrainingEbalV1 <- function(main_cl, pred_func, data1, data2) {
+coTrainingEbalV1 <- function(learner, pred_func, data1, data2) {
   base <- base_ensemble()
   classifiers_ensemble <- base[[1]]
   pred_func_ensemble <- base[[2]]
@@ -254,13 +260,16 @@ coTrainingEbalV1 <- function(main_cl, pred_func, data1, data2) {
       is_sup_empty <- TRUE
     }
   }
+  model1 <- generateModel(learner, form, data1[sup1, ])
+  model2 <- generateModel(learner, form, data2[sup2, ])
+  
   model <- list(model1, model2)
   return(model)
 }
 
 
 ## Ebal V1 DWC Version
-coTrainingEbalV1Dwc <- function(main_cl, pred_func, data1, data2) {
+coTrainingEbalV1Dwc <- function(learner, pred_func, data1, data2) {
   base <- base_ensemble()
   classifiers_ensemble <- base[[1]]
   pred_func_ensemble <- base[[2]]
@@ -333,6 +342,9 @@ coTrainingEbalV1Dwc <- function(main_cl, pred_func, data1, data2) {
       is_sup_empty <- TRUE
     }
   }
+  model1 <- generateModel(learner, form, data1[sup1, ])
+  model2 <- generateModel(learner, form, data2[sup2, ])
+  
   model <- list(model1, model2)
   return(model)
 }
@@ -340,7 +352,7 @@ coTrainingEbalV1Dwc <- function(main_cl, pred_func, data1, data2) {
 
 ## Ebal V2 Standard
 
-coTrainingEbalV2 <- function(data1, data2) {
+coTrainingEbalV2 <- function(learner, pred_func, data1, data2) {
   base <- base_ensemble()
   classifiers_ensemble <- base[[1]]
   pred_func_ensemble <- base[[2]]
@@ -396,13 +408,16 @@ coTrainingEbalV2 <- function(data1, data2) {
       is_sup_empty <- TRUE
     }
   }
-  model <- list(ensemble1, ensemble2)
+  model1 <- generateModel(learner, form, data1[sup1, ])
+  model2 <- generateModel(learner, form, data2[sup2, ])
+
+  model <- list(model1, model2)
   return(model)
 }
 
 
 ## Ebal V2 DWC Version
-coTrainingEbalV2Dwc <- function(main_cl, pred_func, data1, data2) {
+coTrainingEbalV2Dwc <- function(learner, pred_func, data1, data2) {
   base <- base_ensemble()
   classifiers_ensemble <- base[[1]]
   pred_func_ensemble <- base[[2]]
@@ -467,7 +482,10 @@ coTrainingEbalV2Dwc <- function(main_cl, pred_func, data1, data2) {
       is_sup_empty <- TRUE
     }
   }
-  model <- list(ensemble1, ensemble2)
+  model1 <- generateModel(learner, form, data1[sup1, ])
+  model2 <- generateModel(learner, form, data2[sup2, ])
+  
+  model <- list(model1, model2)
   return(model)
 }
 

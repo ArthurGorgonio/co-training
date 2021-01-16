@@ -100,13 +100,8 @@ for (dataset in databases) {
     co_training <- coTrainingEbalV2Dwc(data1, data2)
     
     
-    ensembleMat1 <- predictEnsemble(co_training[[1]], data_test1, data_test1$class)
-    ensemblePred1 <- classify_ensemble(ensembleMat1, data_test1$class)
-    cm1 <- table(ensemblePred1, data_test1$class)
-    
-    ensembleMat2 <- predictEnsemble(co_training[[2]], data_test2, data_test2$class)
-    ensemblePred2 <- classify_ensemble(ensembleMat2, data_test2$class)
-    cm2 <- table(ensemblePred2, data_test2$class)
+    cm1 <- confusionMatrix(co_training[[1]], data_test1)
+    cm2 <- confusionMatrix(co_training[[2]], data_test2)
     # Acurácia
     acc_model1 <- getAcc(cm1)
     acc_model2 <- getAcc(cm2)

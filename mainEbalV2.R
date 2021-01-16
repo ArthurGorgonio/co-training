@@ -22,9 +22,11 @@ for (scri in scripts) {
 Naive <- make_Weka_classifier("weka/classifiers/bayes/NaiveBayes", c("NaiveBayes", "bayes"))
 DT <- make_Weka_classifier("weka/classifiers/rules/DecisionTable", c("DecisionTable", "rules"))
 rm(scripts, scri)
+baseClassifiers <- learner("J48", list(control = Weka_control(C = 0.05)))
 extention <- ".csv"
 label <- "class"
 form <- as.formula("class ~ .")
+funcType <- "probability"
 meansFlexConC1S <- c()
 method <- "Co-Training EbAL V2"
 databases <- c("Abalone.arff", "Arrhythmia.arff", "Car.arff", "Ecoli.arff",
@@ -40,6 +42,9 @@ databases <- c("Abalone.arff", "Arrhythmia.arff", "Car.arff", "Ecoli.arff",
                "ImageSegmentation.arff", "Mushroom.arff", "OzoneLevelDetection.arff", "Nursery.arff",
                "Adult.arff", "PenDigits.arff", "Musk.arff", "Cnae.arff")
 ratio <- 0.1
+learner <- baseClassifiers
+myFuncs <- funcType
+
 
 
 ## Versions Standard and DWC Standard
@@ -99,14 +104,8 @@ for (dataset in databases) {
     
     co_training <- coTrainingEbalV2(data1, data2)
     
-    
-    ensembleMat1 <- predictEnsemble(co_training[[1]], data_test1, data_test1$class)
-    ensemblePred1 <- classify_ensemble(ensembleMat1, data_test1$class)
-    cm1 <- table(ensemblePred1, data_test1$class)
-    
-    ensembleMat2 <- predictEnsemble(co_training[[2]], data_test2, data_test2$class)
-    ensemblePred2 <- classify_ensemble(ensembleMat2, data_test2$class)
-    cm2 <- table(ensemblePred2, data_test2$class)
+    cm1 <- confusionMatrix(co_training[[1]], data_test1)
+    cm2 <- confusionMatrix(co_training[[2]], data_test2)
     # Acurácia
     acc_model1 <- getAcc(cm1)
     acc_model2 <- getAcc(cm2)

@@ -28,7 +28,7 @@ label <- "class"
 form <- as.formula("class ~ .")
 funcType <- "probability"
 meansFlexConC1S <- c()
-method <- "Co-Training DwC"
+method <- "Co-Training EbAL V1 DwC"
 databases <- c("Abalone.arff", "Arrhythmia.arff", "Car.arff", "Ecoli.arff",
                "Glass.arff", "HillValley.arff", "KrVsKp.arff",
                "Leukemia.arff", "Madelon.arff", "MultipleFeaturesKarhunen.arff",
@@ -101,7 +101,7 @@ for (dataset in databases) {
                        samplesClass = length(class))
     
     
-    co_training <- coTrainingDwc(learner, myFuncs, data1, data2)
+    co_training <- coTrainingEbalV1Dwc(learner, myFuncs, data1, data2)
     
     
     cm1 <- confusionMatrix(co_training[[1]], data_test1)
@@ -143,11 +143,11 @@ for (dataset in databases) {
     
   }
   end <- Sys.time()
-  writeArchive("coTrainingMediaDWC.txt", "./", dataName, method, acc_co,
+  writeArchive("coTrainingMediaEbALV1Dwc.txt", "./", dataName, method, acc_co,
                fscore_co, preci_co, recall_co, begin, end)
-  writeArchive("coTrainingVisao1DWC.txt", "./", dataName, method,
+  writeArchive("coTrainingVisao1EbALV1Dwc.txt", "./", dataName, method,
                acc_co_v1, fscore_co_v1, preci_co_v1, recall_co_v1, begin, end)
-  writeArchive("coTrainingVisao2DWC.txt", "./", dataName, method,
+  writeArchive("coTrainingVisao2EbALV1Dwc.txt", "./", dataName, method,
                acc_co_v2, fscore_co_v2, preci_co_v2, recall_co_v2, begin, end)
   cat("Arquivos do método ", method, " foram salvos.\n\n")
   bd <- bd + 1

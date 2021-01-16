@@ -19,7 +19,7 @@ scripts <- list.files()
 for (scri in scripts) {
   source(scri)
 }
-naive <- make_Weka_classifier("weka/classifiers/bayes/NaiveBayes", c("NaiveBayes", "bayes"))
+Naive <- make_Weka_classifier("weka/classifiers/bayes/NaiveBayes", c("NaiveBayes", "bayes"))
 DT <- make_Weka_classifier("weka/classifiers/rules/DecisionTable", c("DecisionTable", "rules"))
 rm(scripts, scri)
 baseClassifiers <- learner("J48", list(control = Weka_control(C = 0.05)))

@@ -18,16 +18,16 @@ basicCheck <- function(data1It, dataXIt, confValue, memo, comp) {
   for (index in 1:length(lvls)) {
     if (letCheck(data1It, dataXIt, confValue, lvls[index], index, comp)) {
       pos <- pos + 1
-      xId[pos] <- as.numeric(levels(dataXIt$id))[dataXIt$id[index]]
+      xId[pos] <- as.numeric(dataXIt$id[index])
       if ((comp == "1") || (comp == "2")) {
-        yCl[pos] <- as.factor(dataXIt$cl[index])
+        yCl[pos] <- as.character(dataXIt$cl[index])
       } else {
-        yCl[pos] <- as.factor(searchClass(xId[pos], memo))
+        yCl[pos] <- as.character(searchClass(xId[pos], memo))
       }
       zConfPred[pos] <- dataXIt[index, 2]
     }
   }
-  samplesData <- data.frame(cl = yCl, prob = zConfPred, id = xId)
+  samplesData <- data.frame(cl = as.factor(yCl), prob = zConfPred, id = xId)
   return(samplesData)
 }
 
@@ -119,13 +119,13 @@ diffConfCheck <- function(data1It, dataXIt, confValue, index1It, index) {
 #'  condition (i.e. vote or sum of confidences).
 #'
 #' @param rawData The dataset of the unlabel and label samples.
+#' @param nClass The total of the classes in the dataset.
 #'
 #' @return A matrix (number of samples x number of distinct classes).
 #'
-generateMemory <- function(rawData) {
-  memo <- matrix(rep(0, nrow(rawData)), nrow(rawData), 
-                 length(levels(rawData$class)), FALSE,
-                 list(rownames(rawData), sort(levels(rawData$class))))
+generateMemory <- function(rawData, nClass, all_levels) {
+  memo <- matrix(rep(0, nrow(rawData) * nClass), nrow(rawData), nClass, FALSE,
+                 list(rownames(rawData), sort(all_levels)))
   rm(rawData)
   return(memo)
 }
@@ -157,16 +157,20 @@ flexConC <- function(learner, predFunc, classDist, initialAcc, method, data,
                      sup, classiName, cr = 5, confValue = 0.95, maxIts = 100) {
   defaultSup <- sup
   it <- 0
-  minClass <- floor(min(classDist$samplesClass) * 0.1)
+  if (min(classDist$samplesClass) < 10) {
+    minClass <- min(classDist$samplesClass)
+  } else {
+    minClass <- floor(min(classDist$samplesClass) * 0.1)
+  }
   nClass <- nrow(classDist)
   trainSetIds <- c()
   oldTrainSetIds <- c()
   # FlexCon-C1 only
   if ((method == "1") || (method == "2")) {
-    memo <- generateMemory(data)
+    memo <- generateMemory(data, nClass, levels(data$class[sup]))
   }
   addRotSuperv <- FALSE
-  while ((it < maxIts) && (length(sup) != nrow(data))) {
+  while ((it < maxIts) && (length(sup) < nrow(data))) {
     newSamples <- c()
     it <- it + 1
     model <- generateModel(learner, form, data[sup, ])
@@ -192,13 +196,14 @@ flexConC <- function(learner, predFunc, classDist, initialAcc, method, data,
       data[trainSetIds, label] <- newSamples$cl
       classify <- validClassification(data, trainSetIds, oldTrainSetIds, nClass,
                                       minClass)
-      sup <- c(sup, trainSetIds)
+      sup <- union(sup, trainSetIds)
       if (classify) {
         oldTrainSetIds <- c()
-        localAcc <- calcLocalAcc(classiName, data[defaultSup, ], data[sup, ])
+        localAcc <- calcLocalAcc(learner, data[defaultSup, ],
+                                 data[setdiff(sup, defaultSup), ])
         confValue <- newConfidence(localAcc, initialAcc, confValue, cr)
       } else {
-        oldTrainSetIds <- c(oldTrainSetIds, trainSetIds)
+        oldTrainSetIds <- union(oldTrainSetIds, trainSetIds)
       }
     } else {
       confValue <- max(probPreds[, 2])

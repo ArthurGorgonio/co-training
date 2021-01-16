@@ -1,14 +1,12 @@
 #' @description Select the best model to compose the ensemble of classifiers.
 #'
 #' @param ensemble The ensemble.
-#' @param trainedModels A list of trained models that will be used to choose the
-#'  best one.
-#' @param accuracy A vector with the accuracy per model in `trainedModels`.
+#' @param newClassifier A new trained classifier to compose the ensemble.
 #'
 #' @return A new `ensemble` aggregating the best model at ensemble. 
 #'
-addingEnsemble <- function(ensemble, trainedModels, accuracy) {
-  ensemble[[length(ensemble) + 1]] <- trainedModels[which.max(accuracy)][[1]]
+addingEnsemble <- function(ensemble, newClassifier) {
+  ensemble[[length(ensemble) + 1]] <- newClassifier
   return(ensemble)
 }
 
@@ -45,8 +43,12 @@ dropEnsemble <- function(ensemble) {
 #'
 generatePredict <- function(model, data, funcType) {
   pred <- predict(model, data, type = funcType)
-  col1 <- colnames(pred)[apply(pred, 1, which.max)]
-  col2 <- apply(pred, 1, max)
+  return(create_predict(pred, data))
+}
+
+create_predict <- function(prediction, data) {
+  col1 <- colnames(prediction)[apply(prediction, 1, which.max)]
+  col2 <- apply(prediction, 1, max)
   return(data.frame(cl = col1, pred = col2, id = row.names(data)))
 }
 
@@ -83,11 +85,11 @@ predictClass <- function(model, testDB) {
   return(prediction)
 }
 
-predictEnsemble <- function(ensemble, oracleDB, nClass) {
-  classPred <- generateMemory(oracleDB, nClass)
+predictEnsemble <- function(ensemble, oracleDB, all_levels) {
+  classPred <- generateMemory(oracleDB, length(all_levels), all_levels)
   for (cl in ensemble) {
     pred <- predictClass(cl, oracleDB)
-    pos <- match(predictClass(cl, oracleDB), colnames(classPred))
+    pos <- match(pred, colnames(classPred))
     for (sample in 1:length(pos)) {
       classPred[sample, pos[sample]] <- classPred[sample, pos[sample]] + 1
     }

@@ -118,7 +118,6 @@ coTrainingDwc <- function(learner, predFunc, data1, data2, k_fixo = T) {
     new_samples2 <- c()
     acertou <- 0
     it <- it + 1
-    cat("\n\n\n\n\n", it, "\n\n\n\n\n")
     # Create and train the base classifier
     model1 <- generateModel(learner, form, data1[sup1, ])
     model2 <- generateModel(learner, form, data2[sup2, ])
@@ -132,7 +131,6 @@ coTrainingDwc <- function(learner, predFunc, data1, data2, k_fixo = T) {
     centroides_2 <- calculate_centroid(data2[sup2,])
     probPreds_distance_2 <- probPreds2
     for (i in 1:nrow(probPreds_distance_1)) {
-      cat("Instance i: ", i)
       cent_1 <- match(probPreds_distance_1$cl[i], rownames(centroides_1))
       cent_2 <- match(probPreds_distance_2$cl[i], rownames(centroides_2))
       

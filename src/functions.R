@@ -87,15 +87,14 @@ coTrainingOriginal <- function(learner, predFunc, data1, data2, k_fixo = T) {
     qtd_add <- min(base_add, length(probPreds1_ordenado))
     
     if (qtd_add > 0) {
-      new_samples1 <- probPreds1[probPreds1_ordenado[1:qtd_add], -2]
-      new_samples2 <- probPreds2[probPreds2_ordenado[1:qtd_add], -2]
-      pos1 <- match(new_samples1$id, rownames(data1))
-      pos2 <- match(new_samples2$id, rownames(data2))
-      data1[pos2, as.character(form[[2]])] <- new_samples2$cl
-      data2[pos1, as.character(form[[2]])] <- new_samples1$cl
-      sup1 <- c(sup1, pos2)
-      sup2 <- c(sup2, pos1)
-      
+      new_samples1 <- probPreds2[probPreds2_ordenado[1:qtd_add], -2]
+      new_samples2 <- probPreds1[probPreds1_ordenado[1:qtd_add], -2]
+      pos1 <- match(new_samples2$id, rownames(data1))
+      pos2 <- match(new_samples1$id, rownames(data2))
+      data1[pos1, as.character(form[[2]])] <- new_samples2$cl
+      data2[pos2, as.character(form[[2]])] <- new_samples1$cl
+      sup1 <- c(sup1, pos1)
+      sup2 <- c(sup2, pos2)
     } else {
       new_samples1 <- c()
       new_samples2 <- c()
@@ -119,7 +118,7 @@ coTrainingDwc <- function(learner, predFunc, data1, data2, k_fixo = T) {
     new_samples2 <- c()
     acertou <- 0
     it <- it + 1
-    
+    cat("\n\n\n\n\n", it, "\n\n\n\n\n")
     # Create and train the base classifier
     model1 <- generateModel(learner, form, data1[sup1, ])
     model2 <- generateModel(learner, form, data2[sup2, ])
@@ -133,6 +132,7 @@ coTrainingDwc <- function(learner, predFunc, data1, data2, k_fixo = T) {
     centroides_2 <- calculate_centroid(data2[sup2,])
     probPreds_distance_2 <- probPreds2
     for (i in 1:nrow(probPreds_distance_1)) {
+      cat("Instance i: ", i)
       cent_1 <- match(probPreds_distance_1$cl[i], rownames(centroides_1))
       cent_2 <- match(probPreds_distance_2$cl[i], rownames(centroides_2))
       
@@ -152,14 +152,14 @@ coTrainingDwc <- function(learner, predFunc, data1, data2, k_fixo = T) {
     qtd_add <- min(base_add, length(probPreds1_ordenado))
     
     if (qtd_add > 0) {
-      new_samples1 <- probPreds_distance_1[probPreds1_ordenado[1:qtd_add], -2]
-      new_samples2 <- probPreds_distance_2[probPreds2_ordenado[1:qtd_add], -2]
-      pos1 <- match(new_samples1$id, rownames(data1))
-      pos2 <- match(new_samples2$id, rownames(data2))
-      data1[pos2, as.character(form[[2]])] <- new_samples2$cl
-      data2[pos1, as.character(form[[2]])] <- new_samples1$cl
-      sup1 <- c(sup1, pos2)
-      sup2 <- c(sup2, pos1)
+      new_samples1 <- probPreds_distance_2[probPreds2_ordenado[1:qtd_add], -2]
+      new_samples2 <- probPreds_distance_1[probPreds1_ordenado[1:qtd_add], -2]
+      pos1 <- match(new_samples2$id, rownames(data1))
+      pos2 <- match(new_samples1$id, rownames(data2))
+      data1[pos1, as.character(form[[2]])] <- new_samples2$cl
+      data2[pos2, as.character(form[[2]])] <- new_samples1$cl
+      sup1 <- c(sup1, pos1)
+      sup2 <- c(sup2, pos2)
       
     } else {
       new_samples1 <- c()

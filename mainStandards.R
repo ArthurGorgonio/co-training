@@ -29,18 +29,18 @@ form <- as.formula("class ~ .")
 funcType <- "probability"
 meansFlexConC1S <- c()
 method <- "Co-Training Standard"
-databases <- c("Abalone.arrf", "Arrhythmia.arrf", "Car.arrf", "Ecoli.arrf",
-               "Glass.arrf", "Hill-valley.arrf", "Kr-vs-kp.arrf",
-               "Leukemia.arrf", "Madelon.arrf", "Multiple-features.arrf",
-               "Secom.arrf", "Seeds.arrf", "Semeion.arrf", "Solar-flare.arrf",
-               "Spectf-heart.arrf", "Tic-tac-toe.arrf", "Twonorm.arrf",
-               "Waveform.arrf", "Wine.arrf", "Yeast.arrf", "Haberman.arrf",
-               "Planning.arrf", "Btsc.arrf", "Mammographic-mass.arrf",
-               "Pima.arrf", "Sonar.arrf", "Solar_flare1.arrf", "Ilpd.arrf",
-               "Automobile.arrf", "German_credit.arrf", "Flags.arrf",
-               "Wilt.arrf", "Vehicle.arrf", "Dermatology.arrf", "Phishing.arrf",
-               "Image-seg.arrf", "Mushroom.arrf", "Ozone.arrf", "Nursery.arrf",
-               "Adult.arrf", "Pen-digits.arrf", "Musk.arrf", "Cnae.arrf")
+databases <- c("Abalone.arff", "Arrhythmia.arff", "Car.arff", "Ecoli.arff",
+               "Glass.arff", "HillValley.arff", "KrVsKp.arff",
+               "Leukemia.arff", "Madelon.arff", "MultipleFeaturesKarhunen.arff",
+               "Secom.arff", "Seeds.arff", "Semeion.arff", "SolarFlare.arff",
+               "SpectfHeart.arff", "TicTacToeEndgame.arff", "Twonorm.arff",
+               "Waveform.arff", "Wine.arff", "Yeast.arff", "Haberman.arff",
+               "PlanningRelax.arff", "Btsc.arff", "MammographicMass.arff",
+               "Pima.arff", "Sonar.arff", "SolarFlare1.arff", "Ilpd.arff",
+               "Automobile.arff", "GermanCredit.arff", "Flags.arff",
+               "Wilt.arff", "Vehicle.arff", "Dermatology.arff", "PhishingWebsite.arff",
+               "ImageSegmentation.arff", "Mushroom.arff", "OzoneLevelDetection.arff", "Nursery.arff",
+               "Adult.arff", "PenDigits.arff", "Musk.arff", "Cnae.arff")
 ratio <- 0.1
 learner <- baseClassifiers
 myFuncs <- funcType
@@ -149,7 +149,7 @@ for (dataset in databases) {
                acc_co_v1, fscore_co_v1, preci_co_v1, recall_co_v1, begin, end)
   writeArchive("coTrainingVisao2Standard.txt", "./", dataName, method,
                acc_co_v2, fscore_co_v2, preci_co_v2, recall_co_v2, begin, end)
-  cat("Arquivos do método ", method, " foram salvos.")
+  cat("Arquivos do método ", method, " foram salvos.\n\n")
   bd <- bd + 1
 }
 

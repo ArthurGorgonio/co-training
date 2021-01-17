@@ -47,9 +47,12 @@ generatePredict <- function(model, data, funcType) {
 }
 
 create_predict <- function(prediction, data) {
-  col1 <- colnames(prediction)[apply(prediction, 1, which.max)]
-  col2 <- apply(prediction, 1, max)
-  return(data.frame(cl = col1, pred = col2, id = row.names(data)))
+  if (!is.matrix(prediction)) {
+    prediction <- t(as.matrix(prediction))
+  }
+    col1 <- colnames(prediction)[apply(prediction, 1, which.max)]
+    col2 <- apply(prediction, 1, max)
+    return(data.frame(cl = col1, pred = col2, id = row.names(data)))
 }
 
 #' @description Measure the accuracy per classifier in ensemple on labeled

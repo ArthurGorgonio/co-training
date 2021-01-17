@@ -102,7 +102,7 @@ for (dataset in databases) {
                        samplesClass = length(class))
     
     
-    co_training <- coTrainingEbalV2(data1, data2)
+    co_training <- coTrainingEbalV2(learner, myFuncs, data1, data2)
     
     cm1 <- confusionMatrix(co_training[[1]], data_test1)
     cm2 <- confusionMatrix(co_training[[2]], data_test2)

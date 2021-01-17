@@ -380,21 +380,22 @@ coTrainingEbalV2 <- function(learner, pred_func, data1, data2) {
     selected1 <- select_ensemble(ensemblePred1, concordance)
     selected2 <- select_ensemble(ensemblePred2, concordance)
     
-    # Converting to id
-    sele_id1 <- match(selected1, rownames(data1[-sup1,]))
-    sele_id2 <- match(selected2, rownames(data2[-sup2,]))
+    if ((length(selected1) > 0) && (length(selected2) > 0)) {
     
-    # Classify instances in unlabelled data
-    probPreds1 <- create_predict(ensemblePred1[sele_id1,], ensemblePred1[sele_id1,])
-    probPreds2 <- create_predict(ensemblePred2[sele_id2,], ensemblePred2[sele_id2,])
+      # Converting to id
+      sele_id1 <- match(selected1, rownames(data1[-sup1,]))
+      sele_id2 <- match(selected2, rownames(data2[-sup2,]))
+     
+      # Classify instances in unlabelled data
+      probPreds1 <- correct_prediction(ensemblePred1, sele_id1)
+      probPreds2 <- correct_prediction(ensemblePred2, sele_id2)
+      
+      # Sort the instances based on confidence value
+      probPreds1_ordenado <- order(probPreds1$pred, decreasing = T)
+      probPreds2_ordenado <- order(probPreds2$pred, decreasing = T)
+      
+      qtd_add <- min(length(probPreds1_ordenado), length(probPreds2_ordenado))
     
-    # Sort the instances based on confidence value
-    probPreds1_ordenado <- order(probPreds1$p, decreasing = T)
-    probPreds2_ordenado <- order(probPreds2$p, decreasing = T)
-    
-    qtd_add <- min(length(probPreds1_ordenado), length(probPreds2_ordenado))
-    
-    if (qtd_add > 0) {
       new_samples1 <- probPreds2[probPreds2_ordenado[1:qtd_add], -2]
       new_samples2 <- probPreds1[probPreds1_ordenado[1:qtd_add], -2]
       pos1 <- match(new_samples2$id, rownames(data1))
@@ -414,6 +415,16 @@ coTrainingEbalV2 <- function(learner, pred_func, data1, data2) {
   model <- list(model1, model2)
   return(model)
 }
+
+
+correct_prediction <- function(ensemblePred, selected) {
+  if (length(selected) > 1) {
+    return(create_predict(ensemblePred[selected,], ensemblePred[selected,]))
+  }
+  return(create_predict(ensemblePred[selected,], ensemblePred))
+}
+
+
 
 
 ## Ebal V2 DWC Version

@@ -28,7 +28,7 @@ label <- "class"
 form <- as.formula("class ~ .")
 funcType <- "probability"
 meansFlexConC1S <- c()
-method <- "Co-Training Standard"
+method <- "Co-Training EbAL V2 DwC"
 databases <- c("Abalone.arff", "Arrhythmia.arff", "Car.arff", "Ecoli.arff",
                "Glass.arff", "HillValley.arff", "KrVsKp.arff",
                "Leukemia.arff", "Madelon.arff", "MultipleFeaturesKarhunen.arff",

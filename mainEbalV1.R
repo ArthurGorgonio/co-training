@@ -15,7 +15,7 @@ setWorkspace <- function() {
 options(java.parameters = "-Xmx4g")
 
 setWorkspace()
-scripts <- list.files()
+scripts <- list.files(pattern = "*.R")
 for (scri in scripts) {
   source(scri)
 }
@@ -143,11 +143,11 @@ for (dataset in databases) {
     
   }
   end <- Sys.time()
-  writeArchive("coTrainingMediaEbALV1.txt", "./", dataName, method, acc_co,
+  writeArchive("coTrainingMediaEbALV1.txt", "../", dataName, method, acc_co,
                fscore_co, preci_co, recall_co, begin, end)
-  writeArchive("coTrainingVisao1EbALV1.txt", "./", dataName, method,
+  writeArchive("coTrainingVisao1EbALV1.txt", "../", dataName, method,
                acc_co_v1, fscore_co_v1, preci_co_v1, recall_co_v1, begin, end)
-  writeArchive("coTrainingVisao2EbALV1.txt", "./", dataName, method,
+  writeArchive("coTrainingVisao2EbALV1.txt", "../", dataName, method,
                acc_co_v2, fscore_co_v2, preci_co_v2, recall_co_v2, begin, end)
   cat("Arquivos do método ", method, " foram salvos.\n\n")
   bd <- bd + 1

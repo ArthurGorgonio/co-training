@@ -504,7 +504,7 @@ coTrainingEbalV2Dwc <- function(learner, pred_func, data1, data2) {
 
 train_ensemble <- function(base_classifiers, data_labeled) {
   ensemble <- list()
-  for (i in 1:length(base_classifiers)) {
+  for (i in 6:length(base_classifiers)) {
     learner <- base_classifiers[[i]]
     model <- generateModel(learner, form, data_labeled)
     ensemble <- addingEnsemble(ensemble, model)

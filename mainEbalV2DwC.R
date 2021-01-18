@@ -15,18 +15,20 @@ setWorkspace <- function() {
 options(java.parameters = "-Xmx4g")
 
 setWorkspace()
-scripts <- list.files()
+scripts <- list.files(pattern = "*.R")
 for (scri in scripts) {
   source(scri)
 }
 Naive <- make_Weka_classifier("weka/classifiers/bayes/NaiveBayes", c("NaiveBayes", "bayes"))
 DT <- make_Weka_classifier("weka/classifiers/rules/DecisionTable", c("DecisionTable", "rules"))
 rm(scripts, scri)
+baseClassifiers <- learner("J48", list(control = Weka_control(C = 0.05)))
 extention <- ".csv"
 label <- "class"
 form <- as.formula("class ~ .")
+funcType <- "probability"
 meansFlexConC1S <- c()
-method <- "Co-Training EbAL V2 DwC"
+method <- "Co-Training Standard"
 databases <- c("Abalone.arff", "Arrhythmia.arff", "Car.arff", "Ecoli.arff",
                "Glass.arff", "HillValley.arff", "KrVsKp.arff",
                "Leukemia.arff", "Madelon.arff", "MultipleFeaturesKarhunen.arff",
@@ -40,6 +42,8 @@ databases <- c("Abalone.arff", "Arrhythmia.arff", "Car.arff", "Ecoli.arff",
                "ImageSegmentation.arff", "Mushroom.arff", "OzoneLevelDetection.arff", "Nursery.arff",
                "Adult.arff", "PenDigits.arff", "Musk.arff", "Cnae.arff")
 ratio <- 0.1
+learner <- baseClassifiers
+myFuncs <- funcType
 
 
 ## Versions Standard and DWC Standard
@@ -97,7 +101,7 @@ for (dataset in databases) {
                        samplesClass = length(class))
     
     
-    co_training <- coTrainingEbalV2Dwc(data1, data2)
+    co_training <- coTrainingEbalV2Dwc(learner, myFuncs, data1, data2)
     
     
     cm1 <- confusionMatrix(co_training[[1]], data_test1)
@@ -139,11 +143,11 @@ for (dataset in databases) {
     
   }
   end <- Sys.time()
-  writeArchive("coTrainingMediaEbALV2Dwc.txt", "./", dataName, method, acc_co,
+  writeArchive("coTrainingMediaEbALV2Dwc.txt", "../", dataName, method, acc_co,
                fscore_co, preci_co, recall_co, begin, end)
-  writeArchive("coTrainingVisao1EbALV2Dwc.txt", "./", dataName, method,
+  writeArchive("coTrainingVisao1EbALV2Dwc.txt", "../", dataName, method,
                acc_co_v1, fscore_co_v1, preci_co_v1, recall_co_v1, begin, end)
-  writeArchive("coTrainingVisao2EbALV2Dwc.txt", "./", dataName, method,
+  writeArchive("coTrainingVisao2EbALV2Dwc.txt", "../", dataName, method,
                acc_co_v2, fscore_co_v2, preci_co_v2, recall_co_v2, begin, end)
   cat("Arquivos do método ", method, " foram salvos.\n\n")
   bd <- bd + 1

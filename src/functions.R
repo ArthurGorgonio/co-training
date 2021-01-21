@@ -118,7 +118,7 @@ coTrainingOriginal <- function(learner, predFunc, data1, data2, k_fixo = T) {
       data1[-sup1,][pos1, as.character(form[[2]])] <- new_samples2$cl
       data2[-sup2,][pos2, as.character(form[[2]])] <- new_samples1$cl
       sup1 <- which(!is.na(data1[, as.character(form[[2]])]))
-      sup2 <- which(!is.na(data2[, as.character(form[[2]])])))
+      sup2 <- which(!is.na(data2[, as.character(form[[2]])]))
     } else {
       new_samples1 <- c()
       new_samples2 <- c()

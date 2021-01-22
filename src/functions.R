@@ -113,12 +113,12 @@ coTrainingOriginal <- function(learner, predFunc, data1, data2, k_fixo = T) {
     if (qtd_add > 0) {
       new_samples1 <- probPreds_distance_1[probPreds1_ordenado[1:qtd_add],-2]
       new_samples2 <- probPreds_distance_2[probPreds2_ordenado[1:qtd_add],-2]
-      pos1 <- match(new_samples2$id, rownames(data1[-sup1,]))
-      pos2 <- match(new_samples1$id, rownames(data2[-sup2,]))
+      pos1 <- match(new_samples1$id, rownames(data1[-sup1,]))
+      pos2 <- match(new_samples2$id, rownames(data2[-sup2,]))
       data1[-sup1,][pos1, as.character(form[[2]])] <- new_samples2$cl
       data2[-sup2,][pos2, as.character(form[[2]])] <- new_samples1$cl
       sup1 <- which(!is.na(data1[, as.character(form[[2]])]))
-      sup2 <- which(!is.na(data2[, as.character(form[[2]])])))
+      sup2 <- which(!is.na(data2[, as.character(form[[2]])]))
     } else {
       new_samples1 <- c()
       new_samples2 <- c()
@@ -179,8 +179,8 @@ coTrainingDwc <- function(learner, predFunc, data1, data2, k_fixo = T) {
     if (qtd_add > 0) {
       new_samples1 <- probPreds_distance_1[probPreds1_ordenado[1:qtd_add],-2]
       new_samples2 <- probPreds_distance_2[probPreds2_ordenado[1:qtd_add],-2]
-      pos1 <- match(new_samples2$id, rownames(data1[-sup1,]))
-      pos2 <- match(new_samples1$id, rownames(data2[-sup2,]))
+      pos1 <- match(new_samples1$id, rownames(data1[-sup1,]))
+      pos2 <- match(new_samples2$id, rownames(data2[-sup2,]))
       data1[-sup1,][pos1, as.character(form[[2]])] <- new_samples2$cl
       data2[-sup2,][pos2, as.character(form[[2]])] <- new_samples1$cl
       sup1 <- which(!is.na(data1[, as.character(form[[2]])]))
@@ -249,8 +249,8 @@ coTrainingEbalV1 <- function(learner, pred_func, data1, data2) {
     if (qtd_add > 0) {
       new_samples1 <- probPreds_distance_1[probPreds1_ordenado[1:qtd_add],-2]
       new_samples2 <- probPreds_distance_2[probPreds2_ordenado[1:qtd_add],-2]
-      pos1 <- match(new_samples2$id, rownames(data1[-sup1,]))
-      pos2 <- match(new_samples1$id, rownames(data2[-sup2,]))
+      pos1 <- match(new_samples1$id, rownames(data1[-sup1,]))
+      pos2 <- match(new_samples2$id, rownames(data2[-sup2,]))
       data1[-sup1,][pos1, as.character(form[[2]])] <- new_samples2$cl
       data2[-sup2,][pos2, as.character(form[[2]])] <- new_samples1$cl
       sup1 <- which(!is.na(data1[, as.character(form[[2]])]))
@@ -331,8 +331,8 @@ coTrainingEbalV1Dwc <- function(learner, pred_func, data1, data2) {
       # Classify instances in unlabelled data
       new_samples1 <- probPreds_distance_1[probPreds1_ordenado[1:qtd_add],-2]
       new_samples2 <- probPreds_distance_2[probPreds2_ordenado[1:qtd_add],-2]
-      pos1 <- match(new_samples2$id, rownames(data1[-sup1,]))
-      pos2 <- match(new_samples1$id, rownames(data2[-sup2,]))
+      pos1 <- match(new_samples1$id, rownames(data1[-sup1,]))
+      pos2 <- match(new_samples2$id, rownames(data2[-sup2,]))
       data1[-sup1,][pos1, as.character(form[[2]])] <- new_samples2$cl
       data2[-sup2,][pos2, as.character(form[[2]])] <- new_samples1$cl
       sup1 <- which(!is.na(data1[, as.character(form[[2]])]))
@@ -398,8 +398,8 @@ coTrainingEbalV2 <- function(learner, pred_func, data1, data2) {
     
       new_samples1 <- probPreds_distance_1[probPreds1_ordenado[1:qtd_add],-2]
       new_samples2 <- probPreds_distance_2[probPreds2_ordenado[1:qtd_add],-2]
-      pos1 <- match(new_samples2$id, rownames(data1[-sup1,]))
-      pos2 <- match(new_samples1$id, rownames(data2[-sup2,]))
+      pos1 <- match(new_samples1$id, rownames(data1[-sup1,]))
+      pos2 <- match(new_samples2$id, rownames(data2[-sup2,]))
       data1[-sup1,][pos1, as.character(form[[2]])] <- new_samples2$cl
       data2[-sup2,][pos2, as.character(form[[2]])] <- new_samples1$cl
       sup1 <- which(!is.na(data1[, as.character(form[[2]])]))
@@ -482,13 +482,12 @@ coTrainingEbalV2Dwc <- function(learner, pred_func, data1, data2) {
       # Select the instances to classify
       new_samples1 <- probPreds_distance_1[probPreds1_ordenado[1:qtd_add],-2]
       new_samples2 <- probPreds_distance_2[probPreds2_ordenado[1:qtd_add],-2]
-      pos1 <- match(new_samples2$id, rownames(data1[-sup1,]))
-      pos2 <- match(new_samples1$id, rownames(data2[-sup2,]))
+      pos1 <- match(new_samples1$id, rownames(data1[-sup1,]))
+      pos2 <- match(new_samples2$id, rownames(data2[-sup2,]))
       data1[-sup1,][pos1, as.character(form[[2]])] <- new_samples2$cl
       data2[-sup2,][pos2, as.character(form[[2]])] <- new_samples1$cl
       sup1 <- which(!is.na(data1[, as.character(form[[2]])]))
       sup2 <- which(!is.na(data2[, as.character(form[[2]])]))
-      
     } else {
       is_sup_empty <- TRUE
     }

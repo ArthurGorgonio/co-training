@@ -131,6 +131,56 @@ coTrainingOriginal <- function(learner, predFunc, data1, data2, k_fixo = T) {
   return(model)
 }
 
+coTrainingRandom <- function(data1, data2, k_fixo = T) {
+  maxIts <- 100
+  predFunc <- "probability"
+  N <- NROW(data1)
+  it <- 0
+  sup1 <- which(!is.na(data1[, as.character(form[[2]])])) #exemplos inicialmente rotulados
+  sup2 <- which(!is.na(data2[, as.character(form[[2]])])) #exemplos inicialmente rotulados
+  base_add <- round(nrow(data1[-sup1,]) * 0.1)
+  while (((it < maxIts) && ((length(sup1) / N) < 1) && ((length(sup2) / N) < 1))) {
+    new_samples1 <- c()
+    new_samples2 <- c()
+    acertou <- 0
+    it <- it + 1
+    
+    # Create and train the base classifier
+    model1 <- generateModel(form, data1[sup1, ])
+    model2 <- generateModel(form, data2[sup2, ])
+    
+    # Classify instances in unlabelled data
+    probPreds1 <- generateProbPreds(model1, data1[-sup1,], predFunc)
+    probPreds2 <- generateProbPreds(model2, data2[-sup2,], predFunc)
+    
+    
+    # Sort the instances based on confidence value
+    probPreds1_ordenado <- sample(probPreds1$id)
+    probPreds2_ordenado <- sample(probPreds2$id)
+    
+    qtd_add <- min(base_add, length(probPreds1_ordenado))
+    
+    if (qtd_add > 0) {
+      new_samples1 <- probPreds1[probPreds1_ordenado[1:qtd_add],-2]
+      new_samples2 <- probPreds2[probPreds2_ordenado[1:qtd_add],-2]
+      pos1 <- match(new_samples1$id, rownames(data1[-sup1,]))
+      pos2 <- match(new_samples2$id, rownames(data2[-sup2,]))
+      data1[-sup1,][pos1, as.character(form[[2]])] <- new_samples2$cl
+      data2[-sup2,][pos2, as.character(form[[2]])] <- new_samples1$cl
+      sup1 <- which(!is.na(data1[, as.character(form[[2]])]))
+      sup2 <- which(!is.na(data2[, as.character(form[[2]])]))
+    } else {
+      new_samples1 <- c()
+      new_samples2 <- c()
+    }
+  }
+  model1 <- generateModel(form, data1[sup1, ])
+  model2 <- generateModel(form, data2[sup2, ])
+  
+  model <- list(model1, model2)
+  return(model)
+}
+
 coTrainingDwc <- function(learner, predFunc, data1, data2, k_fixo = T) {
   maxIts <- 100
   N <- NROW(data1)
@@ -568,8 +618,8 @@ criar_visao <- function(dados) {
 #'
 #' @return A trained model.
 #'
-generateModel <- function(learner, form, dataLab) {
-  model <- runLearner(learner, form, dataLab)
+generateModel <- function(form, dataLab) {
+  model <- J48(formula = form, data = dataLab, control = Weka_control(C = 0.05))
   return(model)
 }
 

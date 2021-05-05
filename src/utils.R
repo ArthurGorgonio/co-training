@@ -1,7 +1,8 @@
 #' @description Install packages if it was not installed and load them.
 #'
 installNeedPacks <- function() {
-  packages <- c("plyr", "DMwR", "DMwR2", "RWeka", "rminer", "ssc", "Hmisc")
+  packages <- c("SSLR", "plyr", "DMwR2", "ssc", "RWeka", "caret", "dplyr",
+                "tidymodels", "rminer")
   if (!require("BiocManager")) {
     install.packages("BiocManager")
   }
@@ -14,3 +15,4 @@ installNeedPacks <- function() {
 }
 
 installNeedPacks()
+tidymodels_prefer()

@@ -58,7 +58,7 @@ for (dataset in databases) {
   recall_test <- c()
   
   ite <- 1
-  
+  begin <- Sys.time()
   for (fold in folds) {
     cat("DataSet[", bd, "]:\t", dataName, "\tIt:\t", ite, "\t\tMétodo:", method, "\n")
     
@@ -69,7 +69,7 @@ for (dataset in databases) {
     labelIds <- trainIds$tr
     data <- newBase(training_instances, labelIds)
     
-    model <- SSLRRandomForest() %>% SSLR::fit(form, data)
+    model <- SSLRRandomForest(trees = 100) %>% SSLR::fit(form, data)
     pred_unlabeled <- predict(model, dataTest, type="raw")
     metrics <- statistics(pred_unlabeled, dataTest$class, "SSLRRandomForest")
     acc_test <- c(acc_test, metrics$acc)
@@ -79,6 +79,7 @@ for (dataset in databases) {
     
     ite <- ite + 1
   }
+  end <- Sys.time()
   
   writeArchive("SSLRRandomForest.txt", "../", dataName, method, acc_co,
                fscore_co, preci_co, recall_co, begin, end)

@@ -60,6 +60,7 @@ for (dataset in databases) {
 
   ite <- 1
 
+  begin <- Sys.time()
   for (fold in folds) {
     cat("DataSet[", bd, "]:", dataName, "\tIt:", ite, "\t\tMétodo:", method, "\n")
 
@@ -90,7 +91,7 @@ for (dataset in databases) {
 
     ite <- ite + 1
   }
-
+  end <- Sys.time()
   writeArchive("GRFClassifierSSLR.txt", "../", dataName, method, acc_test,
                fscore_test, precision_test, recall_test, begin, end)
   cat("Arquivos do método ", method, " foram salvos.\n\n")

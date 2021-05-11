@@ -2,7 +2,7 @@
 #'
 installNeedPacks <- function() {
   packages <- c("SSLR", "plyr", "DMwR2", "ssc", "RWeka", "caret", "dplyr",
-                "tidymodels", "rminer")
+                "tidymodels", "rminer", "Hmisc")
   if (!require("BiocManager")) {
     install.packages("BiocManager")
   }

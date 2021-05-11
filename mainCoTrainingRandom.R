@@ -42,12 +42,12 @@ ratio <- 0.1
 ## Versions Standard and DWC Standard
 bd <- 1
 set.seed(19)
-# for (dataset in databases) {
-  # dataName <- strsplit(dataset, ".", T)[[1]][1]
-  # originalDB <- read.arff(paste("../datasets", dataset, sep = "/"))
-  dataName <- "Iris"
-  originalDB <- iris
-  colnames(originalDB)[5] <- "class"
+for (dataset in databases) {
+  dataName <- strsplit(dataset, ".", T)[[1]][1]
+  originalDB <- read.arff(paste("../datasets", dataset, sep = "/"))
+  # dataName <- "Iris"
+  # originalDB <- iris
+  # colnames(originalDB)[5] <- "class"
   originalDB$class <- droplevels(originalDB$class)
   dataL <- holdout(originalDB$class, .9)
   dataTrain <- originalDB[dataL$tr, ]
@@ -114,5 +114,5 @@ set.seed(19)
                fscore_co, preci_co, recall_co, begin, end)
   cat("Arquivos do método ", method, " foram salvos.\n\n")
   bd <- bd + 1
-# }
+}
 

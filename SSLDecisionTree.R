@@ -81,8 +81,8 @@ for (dataset in databases) {
   }
   end <- Sys.time()
   
-  writeArchive("SSLRDecisionTree.txt", "../", dataName, method, acc_co,
-               fscore_co, preci_co, recall_co, begin, end)
+  writeArchive("SSLRDecisionTree.txt", "../", dataName, method, acc_test,
+               fscore_test, precision_test, recall_test, begin, end)
   cat("Arquivos do método ", method, " foram salvos.\n\n")
   
   bd <- bd + 1

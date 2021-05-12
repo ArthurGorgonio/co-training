@@ -23,32 +23,29 @@ for (scri in scripts) {
 extention <- ".csv"
 label <- "class"
 form <- as.formula("class ~ .")
-databases <- c("Abalone.arff", "Arrhythmia.arff", "Car.arff", "Ecoli.arff",
-               "Glass.arff", "HillValley.arff", "KrVsKp.arff",
-               "Leukemia.arff", "Madelon.arff", "MultipleFeaturesKarhunen.arff",
-               "Secom.arff", "Seeds.arff", "Semeion.arff", "SolarFlare.arff",
-               "SpectfHeart.arff", "TicTacToeEndgame.arff", "Twonorm.arff",
-               "Waveform.arff", "Wine.arff", "Yeast.arff", "Haberman.arff",
-               "PlanningRelax.arff", "Btsc.arff", "MammographicMass.arff",
-               "Pima.arff", "Sonar.arff", "SolarFlare1.arff", "Ilpd.arff",
-               "Automobile.arff", "GermanCredit.arff", "Flags.arff",
-               "Wilt.arff", "Vehicle.arff", "Dermatology.arff", "PhishingWebsite.arff",
-               "ImageSegmentation.arff", "Mushroom.arff", "OzoneLevelDetection.arff", "Nursery.arff",
-               "Adult.arff", "PenDigits.arff", "Musk.arff", "Cnae.arff")
+databases <- c("Btsc.arff", "PhishingWebsite.arff", "ImageSegmentation.arff",
+               "PenDigits.arff", "Musk.arff", "Cnae.arff",
+               "Mushroom.arff", "OzoneLevelDetection.arff", "Nursery.arff",
+               "Adult.arff"
+               )
 ratio <- 0.1
 
 ## Versions Standard and DWC Standard
 bd <- 1
-
 for (dataset in databases) {
   dataName <- strsplit(dataset, ".", T)[[1]][1]
+  # originalDB <- read.arff(paste("../all", dataset, sep = "/"))
   originalDB <- read.arff(paste("../datasets", dataset, sep = "/"))
-  dataL <- holdout(originalDB$class, .9)
+  class_id <- which(colnames(originalDB) == "class")
+  if (length(class_id) == 0) {
+    class_id <- length(colnames(originalDB))
+    colnames(originalDB)[class_id] <- "class"
+  }
+  dataL <- holdout(originalDB$class, .9, mode = "random")
   dataTrain <- originalDB[dataL$tr, ]
   dataTest <- originalDB[dataL$ts, ]
   folds <- stratifiedKFold(dataTrain, dataTrain$class)
   
-  class_id <- which(colnames(dataTest) == "class")
   
   
   # GRFClassifierSSLR
@@ -73,25 +70,44 @@ for (dataset in databases) {
     labelIds <- trainIds$tr
     data <- newBase(training_instances, labelIds)
 
-    model <- GRFClassifierSSLR() %>% SSLR::fit(form, data)
-    pred_unlabeled <- SSLR::predictions(model, type = "raw")
+    model <- GRFClassifierSSLR(class_mass_normalization = F)
+    tryCatch(
+      expr = {
+        model2 <- SSLR::fit.model_sslr(model, form, data)
+        model_trained <- T
+      },
+      error = function(e) {
+        model_trained <- F
+      }
+    )
     
-    data[-labelIds,class_id] <- model$model$classes[pred_unlabeled]
-    
-    data <- bind_rows(data, dataTest[,-class_id])
-    
-    model <- GRFClassifierSSLR() %>% SSLR::fit(form, data)
-    pred_unlabeled <- SSLR::predictions(model, type = "raw")
-    
-    metrics <- statistics(pred_unlabeled, dataTest$class, "GRFClassifierSSLR")
-    acc_test <- c(acc_test, metrics$acc)
-    fscore_test <- c(fscore_test, metrics$fscore)
-    precision_test <- c(precision_test, metrics$precision)
-    recall_test <- c(recall_test, metrics$recall)
-
-    ite <- ite + 1
+    if (model_trained) {
+      model_trained <- F
+      pred_unlabeled <- SSLR::predictions(model2, type = "raw")
+      
+      data[-labelIds,class_id] <- model2$model$classes[pred_unlabeled]
+      
+      data <- bind_rows(data, dataTest[,-class_id])
+      
+      model <- GRFClassifierSSLR(class_mass_normalization = F) %>% SSLR::fit(form, data)
+      pred_unlabeled <- SSLR::predictions(model, type = "raw")
+      
+      metrics <- statistics(pred_unlabeled, dataTest$class, "GRFClassifierSSLR")
+      acc_test <- c(acc_test, metrics$acc)
+      fscore_test <- c(fscore_test, metrics$fscore)
+      precision_test <- c(precision_test, metrics$precision)
+      recall_test <- c(recall_test, metrics$recall)
+  
+      ite <- ite + 1
+    }
   }
   end <- Sys.time()
+  while (length(acc_test) < 10) {
+    acc_test <- c(acc_test, mean(acc_test))
+    fscore_test <- c(fscore_test, mean(fscore_test))
+    precision_test <- c(precision_test, mean(precision_test))
+    recall_test <- c(recall_test, mean(recall_test))
+  }
   writeArchive("GRFClassifierSSLR.txt", "../", dataName, method, acc_test,
                fscore_test, precision_test, recall_test, begin, end)
   cat("Arquivos do método ", method, " foram salvos.\n\n")

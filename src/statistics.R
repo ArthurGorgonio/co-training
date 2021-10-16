@@ -57,3 +57,18 @@ fmeasure <- function(cm) {
   recal <- recall(cm)
   return(2 * ((pre * recal) / (pre + recal)))
 }
+
+
+statistics <- function(predict_labels, real_label, method_name, verbose = F) {
+  cm <- table(levels(real_label)[predict_labels], real_label)
+  acc <- getAcc(cm)
+  preci <- precision(cm)
+  recal <- recall(cm)
+  fscore <- fmeasure(cm)
+  
+  if (verbose) {
+    cat("\n\nMétodo: ", method_name, "\tACC:", acc)
+  }
+  
+  return(list(acc=acc, precision=preci, recall=recal, fscore=fscore))
+}

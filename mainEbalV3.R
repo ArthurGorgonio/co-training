@@ -29,7 +29,18 @@ form <- as.formula("class ~ .")
 funcType <- "probability"
 meansFlexConC1S <- c()
 method <- "Co-Training EbAL V3"
-databases <- c("Haberman.arff")
+databases <- c("Abalone.arff", "Arrhythmia.arff", "Car.arff", "Ecoli.arff",
+               "Glass.arff", "HillValley.arff", "KrVsKp.arff",
+               "Leukemia.arff", "Madelon.arff", "MultipleFeaturesKarhunen.arff",
+               "Secom.arff", "Seeds.arff", "Semeion.arff", "SolarFlare.arff",
+               "SpectfHeart.arff", "TicTacToeEndgame.arff", "Twonorm.arff",
+               "Waveform.arff", "Wine.arff", "Yeast.arff", "Haberman.arff",
+               "PlanningRelax.arff", "Btsc.arff", "MammographicMass.arff",
+               "Pima.arff", "Sonar.arff", "SolarFlare1.arff", "Ilpd.arff",
+               "Automobile.arff", "GermanCredit.arff", "Flags.arff",
+               "Wilt.arff", "Vehicle.arff", "Dermatology.arff", "PhishingWebsite.arff",
+               "ImageSegmentation.arff", "Mushroom.arff", "OzoneLevelDetection.arff", "Nursery.arff",
+               "Adult.arff", "PenDigits.arff", "Musk.arff", "Cnae.arff")
 ratio <- 0.1
 myModel <- baseClassifiers
 myFuncs <- funcType

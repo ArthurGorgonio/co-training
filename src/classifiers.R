@@ -1,3 +1,46 @@
+#' Adding this part from DMwR from Torgo's package to maintain the compatibility
+#'   with all the code. 
+#' ==============================================================
+#' CLASS: learner
+#' ==============================================================
+#' Luis Torgo, Jan 2009
+#' ==============================================================
+#' 
+setClass("learner", representation(func="character",pars="list"))
+
+
+#' --------------------------------------------------------------
+#' constructor function
+learner <- function(func,pars=list()) {
+  if (missing(func)) stop("\nYou need to provide a function name.\n")
+  new("learner",func=func,pars=pars)
+}
+
+# show
+setMethod("show","learner", function(object) {
+  cat('\nLearner:: ',deparse(object@func),'\n\nParameter values\n')
+  for(n in names(object@pars))
+    cat('\t',n,' = ',deparse(object@pars[[n]]),'\n')
+  cat('\n\n')
+  }
+)
+
+#' =====================================================
+#' Function that can be used to call a learning system
+#' whose information is stored in an object of class learner.
+#' =====================================================
+#' Luis Torgo, Fev 2009
+#' =====================================================
+#' Example run:
+#' l  <- learner('nnet',pars=list(size=4,linout=T))
+#' runLearner(l,medv ~ ., Boston)
+#'
+runLearner <- function(l,...) {
+  if (!inherits(l,'learner')) stop(l,' is not of class "learner".')
+  do.call(l@func,c(list(...),l@pars))
+}
+
+
 #' @description Select the best model to compose the ensemble of classifiers.
 #'
 #' @param ensemble The ensemble.

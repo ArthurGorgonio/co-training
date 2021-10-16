@@ -199,7 +199,7 @@ coTrainingDwc <- function(learner, predFunc, data1, data2, k_fixo = T) {
 }
 
 
-coTrainingEbalV1 <- function(learner, pred_func, data1, data2) {
+coTrainingEbalV1 <- function(learner, predFunc, data1, data2) {
   base <- base_ensemble()
   classifiers_ensemble <- base[[1]]
   pred_func_ensemble <- base[[2]]
@@ -237,8 +237,8 @@ coTrainingEbalV1 <- function(learner, pred_func, data1, data2) {
     
     
     # Classify instances in unlabelled data
-    probPreds1 <- generateProbPreds(model1, data1[sele_id1,], pred_func)
-    probPreds2 <- generateProbPreds(model2, data2[sele_id2,], pred_func)
+    probPreds1 <- generateProbPreds(model1, data1[sele_id1,], predFunc)
+    probPreds2 <- generateProbPreds(model2, data2[sele_id2,], predFunc)
     
     # Sort the instances based on confidence value
     probPreds1_ordenado <- order(probPreds1$p, decreasing = T)
@@ -247,8 +247,8 @@ coTrainingEbalV1 <- function(learner, pred_func, data1, data2) {
     qtd_add <- min(length(probPreds1_ordenado), length(probPreds2_ordenado))
     
     if (qtd_add > 0) {
-      new_samples1 <- probPreds_distance_1[probPreds1_ordenado[1:qtd_add],-2]
-      new_samples2 <- probPreds_distance_2[probPreds2_ordenado[1:qtd_add],-2]
+      new_samples1 <- probPreds1[probPreds1_ordenado[1:qtd_add],-2]
+      new_samples2 <- probPreds2[probPreds2_ordenado[1:qtd_add],-2]
       pos1 <- match(new_samples1$id, rownames(data1[-sup1,]))
       pos2 <- match(new_samples2$id, rownames(data2[-sup2,]))
       data1[-sup1,][pos1, as.character(form[[2]])] <- new_samples2$cl
@@ -269,7 +269,7 @@ coTrainingEbalV1 <- function(learner, pred_func, data1, data2) {
 
 
 ## Ebal V1 DWC Version
-coTrainingEbalV1Dwc <- function(learner, pred_func, data1, data2) {
+coTrainingEbalV1Dwc <- function(learner, predFunc, data1, data2) {
   base <- base_ensemble()
   classifiers_ensemble <- base[[1]]
   pred_func_ensemble <- base[[2]]
@@ -351,8 +351,7 @@ coTrainingEbalV1Dwc <- function(learner, pred_func, data1, data2) {
 
 
 ## Ebal V2 Standard
-
-coTrainingEbalV2 <- function(learner, pred_func, data1, data2) {
+coTrainingEbalV2 <- function(learner, predFunc, data1, data2) {
   base <- base_ensemble()
   classifiers_ensemble <- base[[1]]
   pred_func_ensemble <- base[[2]]
@@ -396,8 +395,8 @@ coTrainingEbalV2 <- function(learner, pred_func, data1, data2) {
       
       qtd_add <- min(length(probPreds1_ordenado), length(probPreds2_ordenado))
     
-      new_samples1 <- probPreds_distance_1[probPreds1_ordenado[1:qtd_add],-2]
-      new_samples2 <- probPreds_distance_2[probPreds2_ordenado[1:qtd_add],-2]
+      new_samples1 <- probPreds1[probPreds1_ordenado[1:qtd_add],-2]
+      new_samples2 <- probPreds2[probPreds2_ordenado[1:qtd_add],-2]
       pos1 <- match(new_samples1$id, rownames(data1[-sup1,]))
       pos2 <- match(new_samples2$id, rownames(data2[-sup2,]))
       data1[-sup1,][pos1, as.character(form[[2]])] <- new_samples2$cl
@@ -424,11 +423,8 @@ correct_prediction <- function(ensemblePred, selected) {
   return(create_predict(ensemblePred[selected,], ensemblePred))
 }
 
-
-
-
 ## Ebal V2 DWC Version
-coTrainingEbalV2Dwc <- function(learner, pred_func, data1, data2) {
+coTrainingEbalV2Dwc <- function(learner, predFunc, data1, data2) {
   base <- base_ensemble()
   classifiers_ensemble <- base[[1]]
   pred_func_ensemble <- base[[2]]
@@ -499,11 +495,93 @@ coTrainingEbalV2Dwc <- function(learner, pred_func, data1, data2) {
   return(model)
 }
 
+#' Train the ensemble and apply the selection step based on confidence of the
+#' classification and the labelling is based on the ensemble concordance.
+coTrainingEbalV3 <- function(learner, predFunc, data1, data2) {
+  base <- base_ensemble()
+  classifiers_ensemble <- base[[1]]
+  pred_func_ensemble <- base[[2]]
+  maxIts <- 100
+  N <- NROW(data1)
+  it <- 0
+  concordance <- 15
+  sup1 <- which(!is.na(data1[, as.character(form[[2]])])) #exemplos inicialmente rotulados
+  sup2 <- which(!is.na(data2[, as.character(form[[2]])])) #exemplos inicialmente rotulados
+  base_add <- round(nrow(data1[-sup1,]) * 0.1)
+  is_sup_empty <- FALSE
+  while ((it < maxIts) && ((length(sup1) < N) && (length(sup2) < N)) && !is_sup_empty) {
+    new_samples1 <- c()
+    new_samples2 <- c()
+    acertou <- 0
+    it <- it + 1
+    # Create and train the base classifier
+    model1 <- generateModel(learner, form, data1[sup1, ])
+    model2 <- generateModel(learner, form, data2[sup2, ])
+    
+    # Classify instances in unlabelled data using the single classifier
+    probPreds1 <- generateProbPreds(model1, data1[-sup1,], predFunc)
+    probPreds2 <- generateProbPreds(model2, data2[-sup2,], predFunc)
+    
+    # Sort the instances based on confidence value
+    probPreds1_ordenado <- order(probPreds1$p, decreasing = T)
+    probPreds2_ordenado <- order(probPreds2$p, decreasing = T)
+
+    qtd_add <- min(base_add, length(probPreds1_ordenado))
+  
+    # Converting to id
+    best_samples1 <- match(probPreds1$id[probPreds1_ordenado[1:qtd_add]], rownames(data1[-sup1,]))
+    best_samples2 <- match(probPreds2$id[probPreds2_ordenado[1:qtd_add]], rownames(data2[-sup2,]))
+    
+    if (qtd_add > 0) {
+    
+      # Train base ensemble
+      ensemble1 <- train_ensemble(classifiers_ensemble, data1[sup1, ])
+      ensemble2 <- train_ensemble(classifiers_ensemble, data2[sup2, ])
+      
+      ensemblePred1 <- predictEnsemble(ensemble1, data1[-sup1,][best_samples1,], data1$class[sup1])
+      ensemblePred2 <- predictEnsemble(ensemble2, data2[-sup2,][best_samples2,], data2$class[sup2])
+      
+      # Select the instances to classify
+      # selected1 <- select_ensemble(ensemblePred1, concordance)
+      # selected2 <- select_ensemble(ensemblePred2, concordance)
+      
+      # Converting to id
+      # sele_id1 <- match(selected1, rownames(data1[-sup1,]))
+      # sele_id2 <- match(selected2, rownames(data2[-sup2,]))
+      
+      unlabelled1 <- match(rownames(data1[-sup1,][best_samples1,]), rownames(ensemblePred1))
+      unlabelled2 <- match(rownames(data2[-sup2,][best_samples2,]), rownames(ensemblePred2))
+      
+      # Classify instances in unlabelled data
+      probPreds1 <- correct_prediction(ensemblePred1, unlabelled1)
+      probPreds2 <- correct_prediction(ensemblePred2, unlabelled2)
+      
+      # Sort the instances based on confidence value
+      # probPreds1_ordenado <- order(probPreds1$pred, decreasing = T)
+      # probPreds2_ordenado <- order(probPreds2$pred, decreasing = T)
+      
+      pos1 <- match(probPreds1$id, rownames(data1[-sup1,]))
+      pos2 <- match(probPreds2$id, rownames(data2[-sup2,]))
+      data1[-sup1,][pos1, as.character(form[[2]])] <- probPreds2$cl
+      data2[-sup2,][pos2, as.character(form[[2]])] <- probPreds1$cl
+      sup1 <- which(!is.na(data1[, as.character(form[[2]])]))
+      sup2 <- which(!is.na(data2[, as.character(form[[2]])]))
+    } else {
+      is_sup_empty <- TRUE
+    }
+  }
+  model1 <- generateModel(learner, form, data1[sup1, ])
+  model2 <- generateModel(learner, form, data2[sup2, ])
+  
+  model <- list(model1, model2)
+  return(model)
+}
+
 
 
 train_ensemble <- function(base_classifiers, data_labeled) {
   ensemble <- list()
-  for (i in 6:length(base_classifiers)) {
+  for (i in 1:length(base_classifiers)) {
     learner <- base_classifiers[[i]]
     model <- generateModel(learner, form, data_labeled)
     ensemble <- addingEnsemble(ensemble, model)
@@ -525,6 +603,17 @@ predictEnsemble <- function(ensemble, oracleDB, all_levels) {
 }
 
 select_ensemble <- function(classPred, concordance = 15) {
+  selected <- c()
+  instances <- rownames(classPred)
+  for (i in 1:nrow(classPred)) {
+    if (classPred[i, which.max(classPred[i,])] >= concordance) {
+      selected <- c(selected, instances[i])
+    }
+  }
+  return(selected)
+}
+
+select_enseble_label <- function(classPred) {
   selected <- c()
   instances <- rownames(classPred)
   for (i in 1:nrow(classPred)) {

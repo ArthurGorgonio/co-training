@@ -42,14 +42,14 @@ databases <- c("Abalone.arff", "Arrhythmia.arff", "Car.arff", "Ecoli.arff",
                "ImageSegmentation.arff", "Mushroom.arff", "OzoneLevelDetection.arff", "Nursery.arff",
                "Adult.arff", "PenDigits.arff", "Musk.arff", "Cnae.arff")
 ratio <- 0.1
-learner <- baseClassifiers
+myModel <- baseClassifiers
 myFuncs <- funcType
 
 
 ## Versions Standard and DWC Standard
 bd <- 1
-set.seed(19)
 for (dataset in databases) {
+  set.seed(19)
   dataName <- strsplit(dataset, ".", T)[[1]][1]
   originalDB <- read.arff(paste("../datasets", dataset, sep = "/"))
   originalDB$class <- droplevels(originalDB$class)
@@ -101,7 +101,7 @@ for (dataset in databases) {
                        samplesClass = length(class))
     
     
-    co_training <- coTrainingEbalV1Dwc(learner, myFuncs, data1, data2)
+    co_training <- coTrainingEbalV1Dwc(myModel, myFuncs, data1, data2)
     
     
     cm1 <- confusionMatrix(co_training[[1]], data_test1)

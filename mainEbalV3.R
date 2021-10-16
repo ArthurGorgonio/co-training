@@ -28,19 +28,8 @@ label <- "class"
 form <- as.formula("class ~ .")
 funcType <- "probability"
 meansFlexConC1S <- c()
-method <- "Co-Training EbAL V2"
-databases <- c("Abalone.arff", "Arrhythmia.arff", "Car.arff", "Ecoli.arff",
-               "Glass.arff", "HillValley.arff", "KrVsKp.arff",
-               "Leukemia.arff", "Madelon.arff", "MultipleFeaturesKarhunen.arff",
-               "Secom.arff", "Seeds.arff", "Semeion.arff", "SolarFlare.arff",
-               "SpectfHeart.arff", "TicTacToeEndgame.arff", "Twonorm.arff",
-               "Waveform.arff", "Wine.arff", "Yeast.arff", "Haberman.arff",
-               "PlanningRelax.arff", "Btsc.arff", "MammographicMass.arff",
-               "Pima.arff", "Sonar.arff", "SolarFlare1.arff", "Ilpd.arff",
-               "Automobile.arff", "GermanCredit.arff", "Flags.arff",
-               "Wilt.arff", "Vehicle.arff", "Dermatology.arff", "PhishingWebsite.arff",
-               "ImageSegmentation.arff", "Mushroom.arff", "OzoneLevelDetection.arff", "Nursery.arff",
-               "Adult.arff", "PenDigits.arff", "Musk.arff", "Cnae.arff")
+method <- "Co-Training EbAL V3"
+databases <- c("Haberman.arff")
 ratio <- 0.1
 myModel <- baseClassifiers
 myFuncs <- funcType
@@ -48,8 +37,9 @@ myFuncs <- funcType
 
 
 ## Versions Standard and DWC Standard
-bd <- 1
+bd <- 0
 for (dataset in databases) {
+  bd <- bd + 1
   set.seed(19)
   dataName <- strsplit(dataset, ".", T)[[1]][1]
   originalDB <- read.arff(paste("../datasets", dataset, sep = "/"))
@@ -84,9 +74,15 @@ for (dataset in databases) {
   recall_co_v1 <- c()
   recall_co_v2 <- c()
   
-  ite <- 1
+  ite <- 0
   begin <- Sys.time()
   for (fold in folds) {
+    ite <- ite + 1
+    msg <- paste("DataSet[", bd, "]:\t", dataName, "\tIt:\t", ite, "\n", sep="")
+    cat(msg)
+    
+    
+    # ?pbPost("note", "Experiment Status - Detailed", msg)
     
     train1 <- dat1[-fold, ]
     test1 <- dat1[fold, ]
@@ -101,8 +97,14 @@ for (dataset in databases) {
     classDist <- ddply(train1[, ], ~class, summarise,
                        samplesClass = length(class))
     
-    
-    co_training <- coTrainingEbalV2(myModel, myFuncs, data1, data2)
+    tryCatch(co_training <- coTrainingEbalV3(myModel, myFuncs, data1, data2),
+              error = function(e) {
+                typeError <- paste("Error", e, sep = ": ")
+                msg <- paste(typeError, "\n\nDataSet[", bd, "]:\t", dataName,
+                             "\tIt:\t", ite, "\n", sep="")
+                pbPost("note", "Error in the Experiment!", msg)
+              }
+    )
     
     cm1 <- confusionMatrix(co_training[[1]], data_test1)
     cm2 <- confusionMatrix(co_training[[2]], data_test2)
@@ -137,19 +139,20 @@ for (dataset in databases) {
     recall_co <- c(recall_co, recall_model_mean)
     recall_co_v1 <- c(recall_co_v1, recall_model1)
     recall_co_v2 <- c(recall_co_v2, recall_model2)
-    
-    cat("DataSet[", bd, "]:\t", dataName, "\tIt:\t", ite, "\n")
-    ite <- ite + 1
-    
   }
   end <- Sys.time()
-  writeArchive("coTrainingMediaEbALV2.txt", "../", dataName, method, acc_co,
+  
+  msg <- paste("DataSet[", bd, "]: ", dataName, "\nAcc: ", round(mean(acc_co)*100, 4),
+               sep = "")
+  pbPost("note", "Experiment Status - General Result", msg)
+  
+  writeArchive("coTrainingMediaEbALV3.txt", "../", dataName, method, acc_co,
                fscore_co, preci_co, recall_co, begin, end)
-  writeArchive("coTrainingVisao1EbALV2.txt", "../", dataName, method,
+  writeArchive("coTrainingVisao1EbALV3.txt", "../", dataName, method,
                acc_co_v1, fscore_co_v1, preci_co_v1, recall_co_v1, begin, end)
-  writeArchive("coTrainingVisao2EbALV2.txt", "../", dataName, method,
+  writeArchive("coTrainingVisao2EbALV3.txt", "../", dataName, method,
                acc_co_v2, fscore_co_v2, preci_co_v2, recall_co_v2, begin, end)
   cat("Arquivos do método ", method, " foram salvos.\n\n")
-  bd <- bd + 1
 }
 
+pbPost("file", url = "../coTrainingMediaEbALV3.txt")

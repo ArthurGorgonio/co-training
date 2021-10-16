@@ -1,7 +1,7 @@
 #' @description Install packages if it was not installed and load them.
 #'
 installNeedPacks <- function() {
-  packages <- c("plyr", "DMwR", "DMwR2", "RWeka", "rminer", "ssc", "Hmisc")
+  packages <- c("plyr", "RWeka", "rminer", "Hmisc", "RPushbullet")
   if (!require("BiocManager")) {
     install.packages("BiocManager")
   }
@@ -14,3 +14,5 @@ installNeedPacks <- function() {
 }
 
 installNeedPacks()
+pbSetup("o.87sSLXaQ9tglgRB3DUN0h79XcvvwdXCV")
+1

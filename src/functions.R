@@ -146,8 +146,8 @@ coTrainingRandom <- function(data1, data2, k_fixo = T) {
     it <- it + 1
     
     # Create and train the base classifier
-    model1 <- generateModel(form, data1[sup1, ])
-    model2 <- generateModel(form, data2[sup2, ])
+    model1 <- generateModel(learner, form, data1[sup1, ])
+    model2 <- generateModel(learner, form, data2[sup2, ])
     
     # Classify instances in unlabelled data
     probPreds1 <- generateProbPreds(model1, data1[-sup1,], predFunc)
@@ -174,8 +174,8 @@ coTrainingRandom <- function(data1, data2, k_fixo = T) {
       new_samples2 <- c()
     }
   }
-  model1 <- generateModel(form, data1[sup1, ])
-  model2 <- generateModel(form, data2[sup2, ])
+  model1 <- generateModel(learner, form, data1[sup1, ])
+  model2 <- generateModel(learner, form, data2[sup2, ])
   
   model <- list(model1, model2)
   return(model)
@@ -247,6 +247,87 @@ coTrainingDwc <- function(learner, predFunc, data1, data2, k_fixo = T) {
   model <- list(model1, model2)
   return(model)
 }
+
+#' @description This new function is similar to `coTrainingDwc`. However, the
+#'   main difference between this and the other one is related the way of the
+#'   instances are weighted. In this function, all classes are weighted for each
+#'   instance, while in the last one the most reliable class is selected then
+#'   the weight process is applied. 
+coTrainingDwsc <- function(learner, predFunc, data1, data2, k_fixo = T) {
+  maxIts <- 100
+  N <- NROW(data1)
+  it <- 0
+  cls_1 <- match(label, colnames(data1))
+  cls_2 <- match(label, colnames(data2))
+  sup1 <- which(!is.na(data1[, as.character(form[[2]])])) #exemplos inicialmente rotulados
+  sup2 <- which(!is.na(data2[, as.character(form[[2]])])) #exemplos inicialmente rotulados
+  base_add <- round(nrow(data1[-sup1,]) * 0.1)
+  all_classes <- levels(data1$class[sup1])
+  while (((it < maxIts) && ((length(sup1) / N) < 1) && ((length(sup2) / N) < 1))) {
+    new_samples1 <- c()
+    new_samples2 <- c()
+    acertou <- 0
+    it <- it + 1
+    # Create and train the base classifier
+    model1 <- generateModel(learner, form, data1[sup1, ])
+    model2 <- generateModel(learner, form, data2[sup2, ])
+    
+    # Classify instances in unlabelled data
+    probPreds1 <- generateProbPreds(model1, data1[-sup1,], predFunc, TRUE)
+    probPreds2 <- generateProbPreds(model2, data2[-sup2,], predFunc, TRUE)
+    
+    probPreds_distance_1 <- probPreds1
+    probPreds_distance_2 <- probPreds2
+    
+    centroides_1 <- calculate_centroid(data1[sup1,])
+    centroides_2 <- calculate_centroid(data2[sup2,])
+    for (i in 1:nrow(probPreds_distance_1)) {
+      dist_inst_1 <- c()
+      dist_inst_2 <- c()
+      for (cl in 1:length(all_classes)) {
+        dist_inst_1 <- c(dist_inst_1, euclidian_distance(
+          data1[rownames(probPreds_distance_1)[i],-cls_1], centroides_1[cl,]))
+        dist_inst_2 <- c(dist_inst_2, euclidian_distance(
+          data2[rownames(probPreds_distance_2)[i],-cls_2], centroides_2[cl,]))
+      }
+      probPreds_distance_1[i,] <- probPreds_distance_1[i,] / dist_inst_1
+      probPreds_distance_2[i,] <- probPreds_distance_2[i,] / dist_inst_2
+    }
+    # How to measure the best class?
+    probPreds_distance_1 <- create_predict(probPreds_distance_1, data1[-sup1,])
+    probPreds_distance_2 <- create_predict(probPreds_distance_2, data2[-sup2,])
+    
+    # Sort the instances based on confidence value
+    probPreds1_ordenado <- order(probPreds_distance_1$pred, decreasing = T)
+    probPreds2_ordenado <- order(probPreds_distance_2$pred, decreasing = T)
+    
+    
+    qtd_add <- min(base_add, length(probPreds1_ordenado))
+    
+    if (qtd_add > 0) {
+      new_samples1 <- probPreds_distance_1[probPreds1_ordenado[1:qtd_add],-2]
+      new_samples2 <- probPreds_distance_2[probPreds2_ordenado[1:qtd_add],-2]
+      pos1 <- match(new_samples1$id, rownames(data1[-sup1,]))
+      pos2 <- match(new_samples2$id, rownames(data2[-sup2,]))
+      data1[-sup1,][pos1, as.character(form[[2]])] <- new_samples2$cl
+      data2[-sup2,][pos2, as.character(form[[2]])] <- new_samples1$cl
+      sup1 <- which(!is.na(data1[, as.character(form[[2]])]))
+      sup2 <- which(!is.na(data2[, as.character(form[[2]])]))
+      
+    } else {
+      new_samples1 <- c()
+      new_samples2 <- c()
+    }
+  }
+  model1 <- generateModel(learner, form, data1[sup1, ])
+  model2 <- generateModel(learner, form, data2[sup2, ])
+  
+  model <- list(model1, model2)
+  return(model)
+}
+
+
+
 
 
 coTrainingEbalV1 <- function(learner, predFunc, data1, data2) {
@@ -707,8 +788,8 @@ criar_visao <- function(dados) {
 #'
 #' @return A trained model.
 #'
-generateModel <- function(form, dataLab) {
-  model <- J48(formula = form, data = dataLab, control = Weka_control(C = 0.05))
+generateModel <- function(learner, form, dataLab) {
+  model <- runLearner(learner, form, dataLab)
   return(model)
 }
 
@@ -721,8 +802,8 @@ generateModel <- function(form, dataLab) {
 #'
 #' @return Generate a matrix with all samples x class | confidence value | id.
 #'
-generateProbPreds <- function(model, dataUnl, predFunc) {
-  probPreds <- generatePredict(model, dataUnl, predFunc)
+generateProbPreds <- function(model, dataUnl, predFunc, all = FALSE) {
+  probPreds <- generatePredict(model, dataUnl, predFunc, all)
   return(probPreds)
 }
 

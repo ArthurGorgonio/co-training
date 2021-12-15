@@ -84,9 +84,13 @@ dropEnsemble <- function(ensemble) {
 #' @return A dataframe with 3 columns the class, confidence value of the class
 #'  and the id of the sample in data.
 #'
-generatePredict <- function(model, data, funcType) {
+generatePredict <- function(model, data, funcType, all=FALSE) {
   pred <- predict(model, data, type = funcType)
-  return(create_predict(pred, data))
+  if (!all) {
+    return(create_predict(pred, data))
+  } else {
+    return(pred)
+  }
 }
 
 create_predict <- function(prediction, data) {

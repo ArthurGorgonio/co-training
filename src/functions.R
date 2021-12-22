@@ -44,14 +44,15 @@ calculate_centroid <- function(labeled) {
   for(cl in classes) {
     instances <- which(labeled$class == cl)
     for (feature in 1:features) {
-      centroid[cl, feature] <- mean(labeled[instances, feature])
+      centroid[cl, feature] <- mean(labeled[instances, feature]
+                                    [-which(is.na(labeled[instances,feature]))])
     }
   }
   return (centroid)
 }
 
 euclidian_distance <- function(a, b) {
-  return (sqrt(sum((a - b)^2)))
+  return (sqrt(sum((a[-which(is.na(a))] - b[-which(is.na(a))])^2)))
 }
 
 #' @description Generate the confusion matrix of the model.
@@ -144,7 +145,6 @@ coTrainingRandom <- function(data1, data2, k_fixo = T) {
     new_samples2 <- c()
     acertou <- 0
     it <- it + 1
-    
     # Create and train the base classifier
     model1 <- generateModel(learner, form, data1[sup1, ])
     model2 <- generateModel(learner, form, data2[sup2, ])
@@ -354,7 +354,7 @@ coTrainingDwscSelection <- function(learner, predFunc, data1, data2,
     probPreds2 <- generateProbPreds(model2, data2[-sup2,], predFunc)
     
     probPreds_distance_1 <- generateProbPreds(model1, data1[-sup1,], predFunc, TRUE)
-    probPreds_distance_2 <- generateProbPreds(model1, data1[-sup1,], predFunc, TRUE)
+    probPreds_distance_2 <- generateProbPreds(model2, data2[-sup2,], predFunc, TRUE)
     
     centroides_1 <- calculate_centroid(data1[sup1,])
     centroides_2 <- calculate_centroid(data2[sup2,])
@@ -425,6 +425,7 @@ coTrainingDwscLabeling <- function(learner, predFunc, data1, data2,
     new_samples2 <- c()
     acertou <- 0
     it <- it + 1
+    
     # Create and train the base classifier
     model1 <- generateModel(learner, form, data1[sup1, ])
     model2 <- generateModel(learner, form, data2[sup2, ])
@@ -434,7 +435,7 @@ coTrainingDwscLabeling <- function(learner, predFunc, data1, data2,
     probPreds2 <- generateProbPreds(model2, data2[-sup2,], predFunc)
     
     probPreds_distance_1 <- generateProbPreds(model1, data1[-sup1,], predFunc, TRUE)
-    probPreds_distance_2 <- generateProbPreds(model1, data1[-sup1,], predFunc, TRUE)
+    probPreds_distance_2 <- generateProbPreds(model2, data2[-sup2,], predFunc, TRUE)
     
     centroides_1 <- calculate_centroid(data1[sup1,])
     centroides_2 <- calculate_centroid(data2[sup2,])
@@ -451,8 +452,8 @@ coTrainingDwscLabeling <- function(learner, predFunc, data1, data2,
       probPreds_distance_2[i,] <- probPreds_distance_2[i,] / dist_inst_2
     }
     # How to measure the best class?
-    probPreds_distance_1 <- create_predict(probPreds1, data1[-sup1,])
-    probPreds_distance_2 <- create_predict(probPreds2, data2[-sup2,])
+    probPreds_distance_1 <- create_predict(probPreds_distance_1, data1[-sup1,])
+    probPreds_distance_2 <- create_predict(probPreds_distance_2, data2[-sup2,])
     
     # Sort the instances based on classifier confidence value
     probPreds1_ordenado <- order(probPreds1$pred, decreasing = T)

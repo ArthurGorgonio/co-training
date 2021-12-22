@@ -14,4 +14,3 @@ installNeedPacks <- function() {
 }
 
 installNeedPacks()
-pbSetup("o.87sSLXaQ9tglgRB3DUN0h79XcvvwdXCV")

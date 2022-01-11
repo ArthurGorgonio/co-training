@@ -900,18 +900,21 @@ coTrainingEbalV2DwcaSelect <- function(learner, predFunc, data1, data2) {
     ensemble1 <- train_ensemble(classifiers_ensemble, data1[sup1, ])
     ensemble2 <- train_ensemble(classifiers_ensemble, data2[sup2, ])
     
-    ensemble_pred_1 <- predictEnsemble(ensemble1, data1[sup1,], data1$class[sup1])
-    ensemble_pred_2 <- predictEnsemble(ensemble2, data2[sup2,], data2$class[sup2])
+    ensemble_pred_1 <- predictEnsemble(ensemble1, data1[-sup1,], data1$class[sup1])
+    ensemble_pred_2 <- predictEnsemble(ensemble2, data2[-sup2,], data2$class[sup2])
     
-    probPreds_distance_1 <- predictEnsemble(ensemble1, data1[-sup1,], data1$class[sup1])
-    probPreds_distance_2 <- predictEnsemble(ensemble2, data2[-sup2,], data2$class[sup2])
+    probPreds_distance_1 <- ensemble_pred_1
+    probPreds_distance_2 <- ensemble_pred_2
+    
+    ensemble_pred_1 <- create_predict(ensemble_pred_1, data1[-sup1,])
+    ensemble_pred_2 <- create_predict(ensemble_pred_2, data2[-sup2,])
     
     # Calculate the Centroids
     centroides_1 <- calculate_centroid(data1[sup1,])
     centroides_2 <- calculate_centroid(data2[sup2,])
     
     # Perform the DwS-A for all classes
-    for(i in 1:nrow(ensemblePred1)) {
+    for(i in 1:nrow(ensemble_pred_1)) {
       dist_inst_1 <- c()
       dist_inst_2 <- c()
       for (cl in 1:all_classes) {
@@ -925,7 +928,7 @@ coTrainingEbalV2DwcaSelect <- function(learner, predFunc, data1, data2) {
     }
     
     # Measuring the best DwS-A value for each unlabelled instance
-    probPreds_distance_1 <- create_predict(probPreds_distance_2, data1[-sup1,])
+    probPreds_distance_1 <- create_predict(probPreds_distance_1, data1[-sup1,])
     probPreds_distance_2 <- create_predict(probPreds_distance_2, data2[-sup2,])
     
     # Sort the instances based on confidence value
@@ -983,8 +986,8 @@ coTrainingEbalV2DwcaLabel <- function(learner, predFunc, data1, data2) {
     ensemble2 <- train_ensemble(classifiers_ensemble, data2[sup2, ])
     
     # Predict to select instances
-    ensemble_pred_1 <- predictEnsemble(ensemble1, data1[sup1,], data1$class[sup1])
-    ensemble_pred_2 <- predictEnsemble(ensemble2, data2[sup2,], data2$class[sup2])
+    ensemble_pred_1 <- predictEnsemble(ensemble1, data1[-sup1,], data1$class[sup1])
+    ensemble_pred_2 <- predictEnsemble(ensemble2, data2[-sup2,], data2$class[sup2])
     
     # Copy to perform the DwS-A step for effective labelling
     probPreds_distance_1 <- ensemble_pred_1
@@ -995,7 +998,7 @@ coTrainingEbalV2DwcaLabel <- function(learner, predFunc, data1, data2) {
     centroides_2 <- calculate_centroid(data2[sup2,])
     
     # Perform the DwS-A for all classes
-    for(i in 1:nrow(ensemblePred1)) {
+    for(i in 1:nrow(ensemble_pred_1)) {
       dist_inst_1 <- c()
       dist_inst_2 <- c()
       for (cl in 1:all_classes) {
@@ -1009,12 +1012,15 @@ coTrainingEbalV2DwcaLabel <- function(learner, predFunc, data1, data2) {
     }
     
     # Measuring the best DwS-A value for each unlabelled instance
-    probPreds_distance_1 <- create_predict(probPreds_distance_2, data1[-sup1,])
+    probPreds_distance_1 <- create_predict(probPreds_distance_1, data1[-sup1,])
     probPreds_distance_2 <- create_predict(probPreds_distance_2, data2[-sup2,])
     
+    probPreds_ensemble_1 <- create_predict(ensemble_pred_1, data1[-sup1,])
+    probPreds_ensemble_2 <- create_predict(ensemble_pred_2, data2[-sup2,])
+    
     # Sort the instances based on confidence value
-    probPreds1_ordenado <- order(ensemble_pred_1$pred, decreasing = T)
-    probPreds2_ordenado <- order(ensemble_pred_2$pred, decreasing = T)
+    probPreds1_ordenado <- order(probPreds_ensemble_1$pred, decreasing = T)
+    probPreds2_ordenado <- order(probPreds_ensemble_2$pred, decreasing = T)
     
     qtd_add <- min(base_add, length(probPreds1_ordenado))
     

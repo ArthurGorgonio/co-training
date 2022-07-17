@@ -42,13 +42,18 @@ databases <- c("Abalone.arff", "Arrhythmia.arff", "Car.arff", "Ecoli.arff",
                "ImageSegmentation.arff", "Mushroom.arff",
                "OzoneLevelDetection.arff", "Nursery.arff", "Adult.arff",
                "PenDigits.arff", "Musk.arff", "Cnae.arff")
-ratio <- 0.1
 myModel <- baseClassifiers
 myFuncs <- funcType
 
 
 ## Versions Standard and DWC Standard
 bd <- 1
+
+scriptName <- "_CT_DwSA_Labelling"
+fileName <- paste("labelrate_", ratio * 100, "_select_", selection_rate * 100,
+                  "_concordance_", ebal_concordance, scriptName, ".txt",
+                  sep = "")
+
 for (dataset in databases) {
   set.seed(19)
   dataName <- strsplit(dataset, ".", T)[[1]][1]
@@ -58,53 +63,57 @@ for (dataset in databases) {
   dataTrain <- originalDB[dataL$tr, ]
   dataTest <- originalDB[dataL$ts, ]
   folds <- stratifiedKFold(dataTrain, dataTrain$class)
-  
+  msg <- paste("DataSet[", bd, "]:\t", dataName, "\nParams:\n\t% Label: ",
+                ratio * 100, "%\n\t% Selected: ", selection_rate * 100,
+                "%\n\tEbal concordance: ", ebal_concordance * 100, '%\n',
+                sep="")
+  cat(msg)
+
   visao <- criar_visao(dataTrain)
   dat1 <- visao[[1]]
   dat2 <- visao[[2]]
-  
+
   visao_test <- criar_visao(dataTest)
   data_test1 <- visao_test[[1]]
   data_test2 <- visao_test[[2]]
-  
-  
+
   acc_co <- c()
   acc_co_v1 <- c()
   acc_co_v2 <- c()
-  
+
   fscore_co <- c()
   fscore_co_v1 <- c()
   fscore_co_v2 <- c()
-  
+
   preci_co <- c()
   preci_co_v1 <- c()
   preci_co_v2 <- c()
-  
+
   recall_co <- c()
   recall_co_v1 <- c()
   recall_co_v2 <- c()
-  
+
   ite <- 1
   begin <- Sys.time()
   for (fold in folds) {
-    
+    cat("It:\t", ite, "\n")
+    ite <- ite + 1
+
     train1 <- dat1[-fold, ]
     test1 <- dat1[fold, ]
-    
+
     train2 <- dat2[-fold, ]
     test2 <- dat2[fold, ]
-    
+
     trainIds <- holdout(train1$class, ratio, mode = "random")
     labelIds <- trainIds$tr
     data1 <- newBase(train1, labelIds)
     data2 <- newBase(train2, labelIds)
     classDist <- ddply(train1[, ], ~class, summarise,
                        samplesClass = length(class))
-    
-    
+
     co_training <- coTrainingEbalV2DwcaLabel(myModel, myFuncs, data1, data2)
-    
-    
+
     cm1 <- confusionMatrix(co_training[[1]], data_test1)
     cm2 <- confusionMatrix(co_training[[2]], data_test2)
     # Acurácia
@@ -114,7 +123,7 @@ for (dataset in databases) {
     acc_co <- c(acc_co, acc_model_mean)
     acc_co_v1 <- c(acc_co_v1, acc_model1)
     acc_co_v2 <- c(acc_co_v2, acc_model2)
-    
+
     # Fscore
     fscore_model1 <- fmeasure(cm1)
     fscore_model2 <- fmeasure(cm2)
@@ -122,7 +131,7 @@ for (dataset in databases) {
     fscore_co <- c(fscore_co, fscore_model_mean)
     fscore_co_v1 <- c(fscore_co_v1, fscore_model1)
     fscore_co_v2 <- c(fscore_co_v2, fscore_model2)
-    
+
     # Precision
     preci_model1 <- precision(cm1)
     preci_model2 <- precision(cm2)
@@ -130,7 +139,7 @@ for (dataset in databases) {
     preci_co <- c(preci_co, preci_model_mean)
     preci_co_v1 <- c(preci_co_v1, preci_model1)
     preci_co_v2 <- c(preci_co_v2, preci_model2)
-    
+
     # recall
     recall_model1 <- recall(cm1)
     recall_model2 <- recall(cm2)
@@ -138,19 +147,17 @@ for (dataset in databases) {
     recall_co <- c(recall_co, recall_model_mean)
     recall_co_v1 <- c(recall_co_v1, recall_model1)
     recall_co_v2 <- c(recall_co_v2, recall_model2)
-    
-    cat("DataSet[", bd, "]:\t", dataName, "\tIt:\t", ite, "\n")
-    ite <- ite + 1
-    
   }
+
   end <- Sys.time()
-  writeArchive("coTrainingMediaEbALV2Dwsa_label.txt", "../", dataName, method, acc_co,
-               fscore_co, preci_co, recall_co, begin, end)
-  writeArchive("coTrainingVisao1EbALV2Dwsa_label.txt", "../", dataName, method,
+  writeArchive(fileName, "../", dataName, method, acc_co, fscore_co, preci_co,
+               recall_co, begin, end)
+  writeArchive(paste('V1_', fileName, sep=""), "../", dataName, method,
                acc_co_v1, fscore_co_v1, preci_co_v1, recall_co_v1, begin, end)
-  writeArchive("coTrainingVisao2EbALV2Dwsa_label.txt", "../", dataName, method,
+  writeArchive(paste('V2_', fileName, sep=""), "../", dataName, method,
                acc_co_v2, fscore_co_v2, preci_co_v2, recall_co_v2, begin, end)
   cat("Arquivos do método ", method, " foram salvos.\n\n")
   bd <- bd + 1
 }
 
+setwd('../')

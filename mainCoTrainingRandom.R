@@ -53,61 +53,61 @@ for (dataset in databases) {
   dataTrain <- originalDB[dataL$tr, ]
   dataTest <- originalDB[dataL$ts, ]
   folds <- stratifiedKFold(dataTrain, dataTrain$class)
-  
+
   visao <- criar_visao(dataTrain)
   dat1 <- visao[[1]]
   dat2 <- visao[[2]]
-  
+
   visao_test <- criar_visao(dataTest)
   data_test1 <- visao_test[[1]]
   data_test2 <- visao_test[[2]]
-  
+
   acc_co <- c()
   fscore_co <- c()
   preci_co <- c()
   recall_co <- c()
-  
+
   ite <- 1
   begin <- Sys.time()
   for (fold in folds) {
-    
+
     fold_ids <- match(fold, as.numeric(rownames(dataTrain)))
-    
+
     train1 <- dat1[-fold_ids, ]
     test1 <- dat1[fold_ids, ]
-    
+
     train2 <- dat2[-fold_ids, ]
     test2 <- dat2[fold_ids, ]
-    
+
     trainIds <- holdout(train1$class, ratio, mode = "random")
     labelIds <- trainIds$tr
     data1 <- newBase(train1, labelIds)
     data2 <- newBase(train2, labelIds)
-    
+
     co_training <- coTrainingRandom(data1, data2)
-    
+
     cm1 <- confusionMatrix(co_training[[1]], data_test1)
     cm2 <- confusionMatrix(co_training[[2]], data_test2)
-    
+
     # Acurácia
     acc_model_mean <- mean(getAcc(cm1), getAcc(cm2))
     acc_co <- c(acc_co, acc_model_mean)
-    
+
     # Fscore
     fscore_model_mean <- mean(fmeasure(cm1), fmeasure(cm2))
     fscore_co <- c(fscore_co, fscore_model_mean)
-    
+
     # Precision
     preci_model_mean <- mean(precision(cm1), precision(cm2))
     preci_co <- c(preci_co, preci_model_mean)
-    
+
     # recall
     recall_model_mean <- mean(recall(cm1), recall(cm2))
     recall_co <- c(recall_co, recall_model_mean)
-    
+
     cat("DataSet[", bd, "]:\t", dataName, "\tIt:\t", ite, "\n")
     ite <- ite + 1
-    
+
   }
   end <- Sys.time()
   writeArchive("coTrainingMediaRandom.txt", "../", dataName, method, acc_co,

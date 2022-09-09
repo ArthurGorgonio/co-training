@@ -25,22 +25,53 @@ ebal_concordances <- params$ebal_concordance
 
 need_run <- TRUE
 
+ebal_concordance <- ebal_concordances[2]
+selection_rate <- selection_rates[2]
+for (ratio in ratios) {
+  source("mainStandards.R")
+  source("mainDwsc_select_label.R")
+  source("mainDwsc_select.R")
+  source('mainDwsc_label.R')
+  source("mainEbalV1.R")
+  source("mainEbalV2.R")
+  source("mainEbalV3.R")
+  source("mainEbalV2DwSa_label.R")
+  source("mainEbalV2DwSa_select_label.R")
+  source("mainEbalV2DwSa_select.R")
+}
+
+ebal_concordance <- ebal_concordances[2]
+ratio <- ratios[2]
+rm(selection_rate)
+for (selection_rate in selection_rates) {
+  source("mainStandards.R")
+  source("mainDwsc_select_label.R")
+  source("mainDwsc_select.R")
+  source('mainDwsc_label.R')
+  source("mainEbalV1.R")
+  source("mainEbalV2.R")
+  source("mainEbalV3.R")
+  source("mainEbalV2DwSa_label.R")
+  source("mainEbalV2DwSa_select_label.R")
+  source("mainEbalV2DwSa_select.R")
+}
+
+
+selection_rate <- selection_rates[2]
+ratio <- ratios[2]
+rm(ebal_concordance)
 for (ebal_concordance in ebal_concordances) {
   need_run <- !need_run
-  for (selection_rate in selection_rates) {
-    for (ratio in ratios) {
-      if (need_run) {
-        source("mainStandards.R")
-        source("mainDwsc_select_label.R")
-        source("mainDwsc_select.R")
-        source('mainDwsc_label.R')
-      }
-      source("mainEbalV1.R")
-      source("mainEbalV2.R")
-      source("mainEbalV3.R")
-      source("mainEbalV2DwSa_label.R")
-      source("mainEbalV2DwSa_select_label.R")
-      source("mainEbalV2DwSa_select.R")
-    }
+  if (need_run) {
+    source("mainStandards.R")
+    source("mainDwsc_select_label.R")
+    source("mainDwsc_select.R")
+    source('mainDwsc_label.R')
   }
+  source("mainEbalV1.R")
+  source("mainEbalV2.R")
+  source("mainEbalV3.R")
+  source("mainEbalV2DwSa_label.R")
+  source("mainEbalV2DwSa_select_label.R")
+  source("mainEbalV2DwSa_select.R")
 }

@@ -51,7 +51,7 @@ bd <- 1
 
 script_name <- "_CT_DwSC_Labelling"
 fileName <- paste("labelrate_", ratio * 100, "_select_", selection_rate * 100,
-                  scriptName, ".txt", sep = "")
+                  script_name, ".txt", sep = "")
 
 for (dataset in databases) {
   set.seed(19)

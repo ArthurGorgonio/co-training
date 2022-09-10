@@ -49,9 +49,9 @@ myFuncs <- funcType
 ## Versions Standard and DWC Standard
 bd <- 1
 
-scriptName <- "_CT_EBALV2"
+script_name <- "_CT_EBALV2"
 fileName <- paste("labelrate_", ratio * 100, "_select_", selection_rate * 100,
-                  "_concordance_", ebal_concordance, scriptName, ".txt",
+                  "_concordance_", ebal_concordance, script_name, ".txt",
                   sep = "")
 
 for (dataset in databases) {

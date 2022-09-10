@@ -1,33 +1,11 @@
-args <- commandArgs(TRUE)
+# args <- commandArgs(TRUE)
 # args <- c("-s", "1", "-l", "100")
 
 source('src/utils.R')
 
-method <- "Co-Training Dwcs - Labelling"
-databases <- c("Abalone.arff", "Arrhythmia.arff", "Car.arff", "Ecoli.arff",
-               "Glass.arff", "HillValley.arff", "KrVsKp.arff", "Leukemia.arff",
-               "Madelon.arff", "MultipleFeaturesKarhunen.arff", "Seeds.arff",
-               "Semeion.arff", "SolarFlare.arff", "SpectfHeart.arff",
-               "TicTacToeEndgame.arff", "Twonorm.arff", "Waveform.arff",
-               "Wine.arff", "Yeast.arff", "Haberman.arff", "PlanningRelax.arff",
-               "Btsc.arff", "MammographicMass.arff", "Pima.arff", "Sonar.arff",
-               "SolarFlare1.arff", "Ilpd.arff", "Automobile.arff",
-               "GermanCredit.arff", "Flags.arff", "Wilt.arff", "Vehicle.arff",
-               "Dermatology.arff", "PhishingWebsite.arff",
-               "ImageSegmentation.arff", "Mushroom.arff",
-               "OzoneLevelDetection.arff", "Nursery.arff", "Adult.arff",
-               "PenDigits.arff", "Musk.arff", "Cnae.arff")
-params <- atribArgs(args, databases)
-
-ratios <- params$ratios
-selection_rates <- params$selection_rate
-ebal_concordances <- params$ebal_concordance
-
-need_run <- TRUE
-
-ebal_concordance <- ebal_concordances[2]
-selection_rate <- selection_rates[2]
-for (ratio in ratios) {
+ebal_concordance <- 0.75
+selection_rate <- 0.1
+for (ratio in c(0.05, 0.2)) {
   source("mainStandards.R")
   source("mainDwsc_select_label.R")
   source("mainDwsc_select.R")
@@ -40,10 +18,10 @@ for (ratio in ratios) {
   source("mainEbalV2DwSa_select.R")
 }
 
-ebal_concordance <- ebal_concordances[2]
-ratio <- ratios[2]
+ebal_concordance <- 0.75
+ratio <- 0.1
 rm(selection_rate)
-for (selection_rate in selection_rates) {
+for (selection_rate in c(0.05, 0.15, 0.2)) {
   source("mainStandards.R")
   source("mainDwsc_select_label.R")
   source("mainDwsc_select.R")
@@ -57,21 +35,12 @@ for (selection_rate in selection_rates) {
 }
 
 
-selection_rate <- selection_rates[2]
-ratio <- ratios[2]
-rm(ebal_concordance)
-for (ebal_concordance in ebal_concordances) {
-  need_run <- !need_run
-  if (need_run) {
-    source("mainStandards.R")
-    source("mainDwsc_select_label.R")
-    source("mainDwsc_select.R")
-    source('mainDwsc_label.R')
-  }
-  source("mainEbalV1.R")
-  source("mainEbalV2.R")
-  source("mainEbalV3.R")
-  source("mainEbalV2DwSa_label.R")
-  source("mainEbalV2DwSa_select_label.R")
-  source("mainEbalV2DwSa_select.R")
-}
+selection_rate <- 0.1
+ratio <- 0.1
+ebal_concordance <- 0.6
+source("mainEbalV1.R")
+source("mainEbalV2.R")
+source("mainEbalV3.R")
+source("mainEbalV2DwSa_label.R")
+source("mainEbalV2DwSa_select_label.R")
+source("mainEbalV2DwSa_select.R")

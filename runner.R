@@ -1,6 +1,3 @@
-# args <- commandArgs(TRUE)
-# args <- c("-s", "1", "-l", "100")
-
 source('src/utils.R')
 
 ebal_concordance <- 0.75
